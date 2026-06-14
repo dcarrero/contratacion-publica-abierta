@@ -38,6 +38,7 @@ Route::get('/organismos', [OrganismoController::class, 'index'])->name('organism
 Route::get('/organismos/{organismo:nif}', [OrganismoController::class, 'show'])->name('organismos.show');
 Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.index');
 Route::get('/empresas/{adjudicatario:nif}', [EmpresaController::class, 'show'])->name('empresas.show');
+// La ruta /empresas/{nif}/informe.pdf vive en el módulo privado app/Informes (no público).
 Route::get('/sobre', fn () => view('sobre'))->name('sobre');
 Route::get('/aviso-legal', fn () => view('aviso-legal'))->name('aviso-legal');
 

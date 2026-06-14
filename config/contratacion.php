@@ -6,6 +6,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Sitio público (dominio propio del proyecto)
+    |--------------------------------------------------------------------------
+    | URL pública final del proyecto. De momento contratacionabierta.com (nuestro).
+    | Se usa en la marca de los informes PDF, emails, etc. Cambiar aquí (o por env)
+    | si se fija otro dominio definitivo.
+    */
+    'sitio' => [
+        'nombre' => env('SITIO_NOMBRE', 'Contratación Abierta'),
+        'dominio' => env('SITIO_DOMINIO', 'contratacionabierta.com'),
+        'url' => env('SITIO_URL', 'https://contratacionabierta.com'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Feeds PLACSP (Plataforma de Contratación del Sector Público)
     |--------------------------------------------------------------------------
     */
@@ -177,7 +191,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'admin' => [
-        'email' => env('ADMIN_EMAIL', 'admin@contratacionabierta.es'),
+        'email' => env('ADMIN_EMAIL', 'admin@contratacionabierta.com'),
         'default_password' => env('ADMIN_PASSWORD', 'change-me-now'),
         'allowed_ips' => array_filter(explode(',', env('ADMIN_ALLOWED_IPS', '127.0.0.1,::1'))),
         'commands' => [

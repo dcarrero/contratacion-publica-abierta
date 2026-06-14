@@ -28,7 +28,7 @@
 <body>
     <div class="header">
         <h1>@yield('title')</h1>
-        <div class="subtitle">Contratación Abierta &mdash; contratacionabierta.es</div>
+        <div class="subtitle">{{ config('contratacion.sitio.nombre') }} &mdash; {{ config('contratacion.sitio.dominio') }}</div>
     </div>
 
     <div class="content">

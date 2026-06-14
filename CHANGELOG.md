@@ -3,6 +3,18 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.1.1] - 2026-06-14
+
+### Corregido
+
+- **Dominio de marca en los informes PDF**: el pie/cabecera de los informes (CCAA y anual) mostraba un
+  dominio incorrecto; ahora usa el dominio del proyecto (contratacionabierta.com).
+
+### Añadido
+
+- **Config `contratacion.sitio`** (`nombre`, `dominio`, `url`, configurables por variables de entorno
+  `SITIO_NOMBRE` / `SITIO_DOMINIO` / `SITIO_URL`): para autoalojadores que quieran personalizar la marca.
+
 ## [1.1.0] - 2026-06-14
 
 ### Calidad de datos y normalización
