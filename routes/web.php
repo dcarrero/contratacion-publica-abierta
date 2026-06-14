@@ -21,6 +21,7 @@ use App\Http\Controllers\InformeController;
 use App\Http\Controllers\MapaApiController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\OrganismoController;
+use App\Http\Controllers\RadiografiaController;
 use App\Http\Controllers\RankingsController;
 use App\Http\Controllers\RssController;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,8 @@ Route::get('/organismos/{organismo:nif}', [OrganismoController::class, 'show'])-
 Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.index');
 Route::get('/empresas/{adjudicatario:nif}', [EmpresaController::class, 'show'])->name('empresas.show');
 // La ruta /empresas/{nif}/informe.pdf vive en el módulo privado app/Informes (no público).
+Route::get('/radiografia', [RadiografiaController::class, 'index'])->name('radiografia.index');
+Route::get('/radiografia/{slug}', [RadiografiaController::class, 'show'])->name('radiografia.show');
 Route::get('/sobre', fn () => view('sobre'))->name('sobre');
 Route::get('/aviso-legal', fn () => view('aviso-legal'))->name('aviso-legal');
 

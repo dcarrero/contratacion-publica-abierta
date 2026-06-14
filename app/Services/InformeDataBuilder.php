@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Anomalia;
 use App\Models\ComunidadAutonoma;
+use App\Models\Provincia;
 use App\Support\SqlDialect;
 use Illuminate\Support\Facades\DB;
 
@@ -24,8 +25,34 @@ class InformeDataBuilder
     public function buildCcaa(string $nuts2): array
     {
         $ccaa = ComunidadAutonoma::where('nuts', $nuts2)->firstOrFail();
-        $nutsLike = "{$nuts2}%";
 
+        return array_merge([
+            'nuts' => $nuts2,
+            'nombre' => $ccaa->nombre,
+            'generado_at' => now()->toIso8601String(),
+        ], $this->buildGeoReport("{$nuts2}%", $ccaa->poblacion));
+    }
+
+    /**
+     * Radiografía de una provincia (A4): mismo informe geográfico que CCAA pero filtrado por
+     * el NUTS3 de la provincia y con su población. Contenido público de transparencia.
+     */
+    public function buildProvincia(Provincia $provincia): array
+    {
+        return array_merge([
+            'nuts' => $provincia->nuts,
+            'nombre' => $provincia->nombre,
+            'comunidad' => $provincia->comunidadAutonoma?->nombre,
+            'generado_at' => now()->toIso8601String(),
+        ], $this->buildGeoReport("{$provincia->nuts}%", $provincia->poblacion));
+    }
+
+    /**
+     * Cuerpo común del informe geográfico (CCAA o provincia): KPIs, per cápita, evolución,
+     * distribución, top CPV/adjudicatarios/organismos y anomalías, filtrando por $nutsLike.
+     */
+    private function buildGeoReport(string $nutsLike, ?int $poblacion): array
+    {
         // KPIs
         $kpis = DB::table('contratos')
             ->where('nuts', 'LIKE', $nutsLike)
@@ -126,9 +153,6 @@ class InformeDataBuilder
         $anomaliasResumen = $this->buildAnomaliasResumen($nutsLike);
 
         return [
-            'nuts' => $nuts2,
-            'nombre' => $ccaa->nombre,
-            'generado_at' => now()->toIso8601String(),
             'kpis' => [
                 'total_contratos' => $totalContratos,
                 'total_importe' => $totalImporte,
@@ -136,9 +160,9 @@ class InformeDataBuilder
                 'total_adjudicatarios' => $totalAdjudicatarios,
                 'pct_menores' => $pctMenores,
                 'importe_medio' => $importeMedio,
-                'poblacion' => $ccaa->poblacion,
-                'gasto_per_capita' => ($ccaa->poblacion && $ccaa->poblacion > 0)
-                    ? round($totalImporte / $ccaa->poblacion, 2)
+                'poblacion' => $poblacion,
+                'gasto_per_capita' => ($poblacion && $poblacion > 0)
+                    ? round($totalImporte / $poblacion, 2)
                     : null,
             ],
             'evolucion_anual' => $evolucionAnual,

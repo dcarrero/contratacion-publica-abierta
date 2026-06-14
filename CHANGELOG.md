@@ -3,6 +3,15 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.2.0] - 2026-06-14
+
+### Añadido
+
+- **Radiografía por provincia** (`/radiografia`): nueva sección pública de transparencia que muestra, por
+  provincia, el importe de contratación pública adjudicada, el **gasto por habitante** (cruce con el padrón
+  del INE), los principales adjudicatarios y organismos, y la evolución anual. Pensada para consulta
+  ciudadana y prensa local. Incluye los contratos con código territorial (NUTS) a nivel provincial.
+
 ## [1.1.1] - 2026-06-14
 
 ### Corregido

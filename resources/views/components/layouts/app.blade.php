@@ -58,6 +58,9 @@
                     <a href="{{ route('empresas.index') }}" class="hover:text-red-200 transition {{ request()->routeIs('empresas.*') ? 'text-white underline underline-offset-4' : 'text-red-100' }}">
                         Adjudicatarios
                     </a>
+                    <a href="{{ route('radiografia.index') }}" class="hover:text-red-200 transition {{ request()->routeIs('radiografia.*') ? 'text-white underline underline-offset-4' : 'text-red-100' }}">
+                        Radiografía
+                    </a>
                     <a href="{{ route('sobre') }}" class="hover:text-red-200 transition {{ request()->routeIs('sobre') ? 'text-white underline underline-offset-4' : 'text-red-100' }}">
                         Sobre
                     </a>
@@ -93,6 +96,7 @@
                 <a href="{{ route('analisis') }}" class="block px-3 py-2 rounded hover:bg-primary-dark transition text-sm">Análisis</a>
                 <a href="{{ route('organismos.index') }}" class="block px-3 py-2 rounded hover:bg-primary-dark transition text-sm">Organismos</a>
                 <a href="{{ route('empresas.index') }}" class="block px-3 py-2 rounded hover:bg-primary-dark transition text-sm">Adjudicatarios</a>
+                <a href="{{ route('radiografia.index') }}" class="block px-3 py-2 rounded hover:bg-primary-dark transition text-sm">Radiografía</a>
                 <a href="{{ route('sobre') }}" class="block px-3 py-2 rounded hover:bg-primary-dark transition text-sm">Sobre</a>
             </div>
         </nav>
