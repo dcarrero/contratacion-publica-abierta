@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:cbc="urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2" xmlns:cac-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2" xmlns:cbc-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonBasicComponents-2">
+    <id>https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/99999001</id>
+    <link href="https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&amp;idEvl=fullTest"/>
+    <summary type="text">Id licitación: JCCM-2026/500; Órgano de Contratación: Junta de Comunidades de Castilla-La Mancha; Importe: 350000 EUR; Estado: ADJ</summary>
+    <title>Servicio de desarrollo y mantenimiento de aplicaciones informáticas para la JCCM</title>
+    <updated>2026-03-01T18:30:00.000+01:00</updated>
+    <cac-place-ext:ContractFolderStatus>
+        <cbc:ContractFolderID>JCCM-2026/500</cbc:ContractFolderID>
+        <cbc-place-ext:ContractFolderStatusCode languageID="es">ADJ</cbc-place-ext:ContractFolderStatusCode>
+        <cbc:UUID schemeName="TED">a1b2c3d4-e5f6-7890-abcd-ef1234567890</cbc:UUID>
+        <cac-place-ext:LocatedContractingParty>
+            <cbc:ContractingPartyTypeCode>2</cbc:ContractingPartyTypeCode>
+            <cbc:ActivityCode>6</cbc:ActivityCode>
+            <cbc:BuyerProfileURIID>https://contrataciondelestado.es/wps/poc?uri=deeplink:perfilContratante&amp;idBp=testJCCM</cbc:BuyerProfileURIID>
+            <cac:Party>
+                <cac:PartyIdentification>
+                    <cbc:ID schemeName="DIR3">A08002911</cbc:ID>
+                </cac:PartyIdentification>
+                <cac:PartyIdentification>
+                    <cbc:ID schemeName="NIF">S4500010I</cbc:ID>
+                </cac:PartyIdentification>
+                <cac:PartyIdentification>
+                    <cbc:ID schemeName="ID_PLATAFORMA">12345678901234</cbc:ID>
+                </cac:PartyIdentification>
+                <cac:PartyName>
+                    <cbc:Name>Junta de Comunidades de Castilla-La Mancha</cbc:Name>
+                </cac:PartyName>
+                <cac:PostalAddress>
+                    <cbc:CityName>Toledo</cbc:CityName>
+                    <cbc:PostalZone>45071</cbc:PostalZone>
+                    <cac:AddressLine>
+                        <cbc:Line>Plaza Zocodover, 7</cbc:Line>
+                    </cac:AddressLine>
+                    <cac:Country>
+                        <cbc:IdentificationCode>ES</cbc:IdentificationCode>
+                        <cbc:Name>España</cbc:Name>
+                    </cac:Country>
+                </cac:PostalAddress>
+                <cac:Contact>
+                    <cbc:Name>Servicio de Contratación</cbc:Name>
+                    <cbc:Telephone>925267100</cbc:Telephone>
+                    <cbc:ElectronicMail>contratacion@jccm.es</cbc:ElectronicMail>
+                </cac:Contact>
+            </cac:Party>
+        </cac-place-ext:LocatedContractingParty>
+        <cac:ProcurementProject>
+            <cbc:Name>Servicio de desarrollo y mantenimiento de aplicaciones informáticas para la JCCM</cbc:Name>
+            <cbc:TypeCode>2</cbc:TypeCode>
+            <cbc:SubTypeCode>72000000</cbc:SubTypeCode>
+            <cac:BudgetAmount>
+                <cbc:EstimatedOverallContractAmount currencyID="EUR">420000</cbc:EstimatedOverallContractAmount>
+                <cbc:TotalAmount currencyID="EUR">423500</cbc:TotalAmount>
+                <cbc:TaxExclusiveAmount currencyID="EUR">350000</cbc:TaxExclusiveAmount>
+            </cac:BudgetAmount>
+            <cac:RequiredCommodityClassification>
+                <cbc:ItemClassificationCode>72200000</cbc:ItemClassificationCode>
+            </cac:RequiredCommodityClassification>
+            <cac:RequiredCommodityClassification>
+                <cbc:ItemClassificationCode>72260000</cbc:ItemClassificationCode>
+            </cac:RequiredCommodityClassification>
+            <cac:RealizedLocation>
+                <cbc:CountrySubentity>Toledo</cbc:CountrySubentity>
+                <cbc:CountrySubentityCode>ES425</cbc:CountrySubentityCode>
+                <cac:Address>
+                    <cbc:CityName>TOLEDO</cbc:CityName>
+                    <cbc:PostalZone>45071</cbc:PostalZone>
+                    <cac:Country>
+                        <cbc:IdentificationCode>ES</cbc:IdentificationCode>
+                        <cbc:Name>España</cbc:Name>
+                    </cac:Country>
+                </cac:Address>
+            </cac:RealizedLocation>
+            <cac:PlannedPeriod>
+                <cbc:DurationMeasure unitCode="MON">36</cbc:DurationMeasure>
+            </cac:PlannedPeriod>
+        </cac:ProcurementProject>
+        <cac:TenderingTerms>
+            <cbc:FundingProgramCode name="No hay financiación con fondos de la UE">NO-EU</cbc:FundingProgramCode>
+            <cac:AwardingTerms>
+                <cac:AwardingCriteria>
+                    <cbc:AwardingCriteriaTypeCode>OBJ</cbc:AwardingCriteriaTypeCode>
+                    <cbc:Description>Precio</cbc:Description>
+                    <cbc:WeightNumeric>60</cbc:WeightNumeric>
+                </cac:AwardingCriteria>
+                <cac:AwardingCriteria>
+                    <cbc:AwardingCriteriaTypeCode>SUBJ</cbc:AwardingCriteriaTypeCode>
+                    <cbc:Description>Calidad técnica</cbc:Description>
+                    <cbc:WeightNumeric>40</cbc:WeightNumeric>
+                </cac:AwardingCriteria>
+            </cac:AwardingTerms>
+        </cac:TenderingTerms>
+        <cac:TenderingProcess>
+            <cbc:ProcedureCode>1</cbc:ProcedureCode>
+            <cbc:UrgencyCode>1</cbc:UrgencyCode>
+            <cac:TenderSubmissionDeadlinePeriod>
+                <cbc:EndDate>2026-02-15</cbc:EndDate>
+                <cbc:EndTime>14:00:00</cbc:EndTime>
+            </cac:TenderSubmissionDeadlinePeriod>
+        </cac:TenderingProcess>
+        <cac-place-ext:TenderResult>
+            <cbc:AwardDate>2026-02-28</cbc:AwardDate>
+            <cbc:ReceivedTenderQuantity>8</cbc:ReceivedTenderQuantity>
+            <cbc:SMEAwardedIndicator>false</cbc:SMEAwardedIndicator>
+            <cac:WinningParty>
+                <cac:PartyIdentification>
+                    <cbc:ID>A28001122</cbc:ID>
+                </cac:PartyIdentification>
+                <cac:PartyName>
+                    <cbc:Name>Tecnologías Avanzadas S.A.</cbc:Name>
+                </cac:PartyName>
+            </cac:WinningParty>
+            <cac:AwardedTenderedProject>
+                <cac:LegalMonetaryTotal>
+                    <cbc:PayableAmount currencyID="EUR">320000</cbc:PayableAmount>
+                    <cbc:TaxInclusiveAmount currencyID="EUR">387200</cbc:TaxInclusiveAmount>
+                </cac:LegalMonetaryTotal>
+            </cac:AwardedTenderedProject>
+        </cac-place-ext:TenderResult>
+    </cac-place-ext:ContractFolderStatus>
+</entry>

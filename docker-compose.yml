@@ -1,0 +1,31 @@
+services:
+  app:
+    build: ./docker
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - .:/app
+    env_file: .env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: contratacion
+      POSTGRES_USER: contratacion
+      POSTGRES_PASSWORD: contratacion
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contratacion -d contratacion"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

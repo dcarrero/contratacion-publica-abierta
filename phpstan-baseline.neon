@@ -1,0 +1,313 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Offset ''nif_organo'' on non\-empty\-array\<string, mixed\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Console/Commands/BootstrapFromCsv.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between float\|non\-empty\-string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Console/Commands/BootstrapFromCsv.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Console/Commands/BootstrapFromCsv.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Console/Commands/EnrichAndaluciaUrls.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SyncMadrid\:\:resolveSince\(\) should return DateTimeInterface\|null but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Console/Commands/SyncMadrid.php
+
+		-
+			message: '#^Offset ''nif_organo'' on non\-empty\-array\<string, mixed\> in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.offset
+			count: 1
+			path: app/Console/Commands/SyncMadrid.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SyncPlacspLicitaciones\:\:resolveSince\(\) should return DateTimeInterface\|null but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Console/Commands/SyncPlacspLicitaciones.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SyncPlacspMenores\:\:resolveSince\(\) should return DateTimeInterface\|null but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Console/Commands/SyncPlacspMenores.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\FuenteDatos\:\:\$semaforo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/AdminDashboardController.php
+
+		-
+			message: '#^Cannot call method diffInDays\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Admin/AdminDashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\FuenteDatos\:\:\$semaforo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/AdminFuentesController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\FuenteDatos\:\:\$total_contratos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/AdminFuentesController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\FuenteDatos\:\:\$ultimo_log\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/AdminFuentesController.php
+
+		-
+			message: '#^Cannot call method diffInDays\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Admin/AdminFuentesController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ComunidadAutonoma\:\:\$stats_contratos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AdministracionController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ComunidadAutonoma\:\:\$stats_importe\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AdministracionController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ComunidadAutonoma\:\:\$stats_organismos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AdministracionController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ComunidadAutonoma\:\:\$stats_per_capita\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AdministracionController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$total_contratos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AdministracionController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$total_importe\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AdministracionController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$contrato_mayor\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/EmpresaController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$organismos_distintos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/EmpresaController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/EmpresaController.php
+
+		-
+			message: '#^Parameter \#3 \$callback of static method Illuminate\\Cache\\Repository\:\:remember\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/EmpresaController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/ExportController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Controllers/ExportController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$adjudicatarios_distintos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OrganismoController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OrganismoController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contrato\:\:\$total_menores\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OrganismoController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/RssController.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$adjudicatario\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$cpv\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$es_menor\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$estado\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$fecha_adjudicacion\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$fecha_formalizacion\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$fecha_publicacion\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$importe_adjudicacion\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$importe_adjudicacion_con_iva\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$num_ofertas\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$nuts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$objeto\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$organismo\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$placsp_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$procedimiento\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$tipo_contrato\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ContratoResource\:\:\$url_placsp\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ContratoResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:ccaa\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Livewire/RankingEmpresas.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:ccaa\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Livewire/RankingOrganismos.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: app/Services/InformeDataBuilder.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: app/Services/Regional/CastillaYLeonParser.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 3
+			path: app/Services/StatsRecalculator.php

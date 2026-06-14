@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cbc="urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2" xmlns:cac-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2" xmlns:cbc-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonBasicComponents-2">
+    <id>https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom</id>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom" rel="self"/>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom" rel="first"/>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_20260301_120000.atom" rel="next"/>
+    <title>Licitaciones - Test Page 1</title>
+    <updated>2026-03-02T19:05:52.061+01:00</updated>
+    <!-- Entry 1: CLM - Toledo -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/12345001</id>
+        <link href="https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&amp;idEvl=test1"/>
+        <summary type="text">Id licitación: EXP-2026/001; Órgano de Contratación: Diputación de Toledo; Importe: 150000 EUR; Estado: PUB</summary>
+        <title>Suministro de material de oficina para la Diputación de Toledo</title>
+        <updated>2026-03-02T10:00:00.000+01:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>EXP-2026/001</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">PUB</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="DIR3">LA0003832</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">P4500000A</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Diputación Provincial de Toledo</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Suministro de material de oficina para la Diputación de Toledo</cbc:Name>
+                <cbc:TypeCode>1</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">150000</cbc:TaxExclusiveAmount>
+                    <cbc:TotalAmount currencyID="EUR">181500</cbc:TotalAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>30190000</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentity>Toledo</cbc:CountrySubentity>
+                    <cbc:CountrySubentityCode>ES425</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+                <cac:PlannedPeriod>
+                    <cbc:DurationMeasure unitCode="MON">12</cbc:DurationMeasure>
+                </cac:PlannedPeriod>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+                <cac:TenderSubmissionDeadlinePeriod>
+                    <cbc:EndDate>2026-04-15</cbc:EndDate>
+                </cac:TenderSubmissionDeadlinePeriod>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+    <!-- Entry 2: CLM - Ciudad Real con adjudicación -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/12345002</id>
+        <link href="https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&amp;idEvl=test2"/>
+        <summary type="text">Id licitación: CR-2025/123; Órgano de Contratación: Ayuntamiento de Ciudad Real; Importe: 75000 EUR; Estado: ADJ</summary>
+        <title>Servicio de limpieza de edificios municipales</title>
+        <updated>2026-03-01T14:30:00.000+01:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>CR-2025/123</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">ADJ</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">P1300000B</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Ayuntamiento de Ciudad Real</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Servicio de limpieza de edificios municipales</cbc:Name>
+                <cbc:TypeCode>2</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">75000</cbc:TaxExclusiveAmount>
+                    <cbc:TotalAmount currencyID="EUR">90750</cbc:TotalAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>90911200</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentity>Ciudad Real</cbc:CountrySubentity>
+                    <cbc:CountrySubentityCode>ES422</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+                <cac:PlannedPeriod>
+                    <cbc:DurationMeasure unitCode="MON">24</cbc:DurationMeasure>
+                </cac:PlannedPeriod>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+                <cac:TenderSubmissionDeadlinePeriod>
+                    <cbc:EndDate>2025-12-31</cbc:EndDate>
+                </cac:TenderSubmissionDeadlinePeriod>
+            </cac:TenderingProcess>
+            <cac-place-ext:TenderResult>
+                <cbc:AwardDate>2026-01-15</cbc:AwardDate>
+                <cbc:ReceivedTenderQuantity>5</cbc:ReceivedTenderQuantity>
+                <cbc:SMEAwardedIndicator>true</cbc:SMEAwardedIndicator>
+                <cac:WinningParty>
+                    <cac:PartyIdentification>
+                        <cbc:ID>B13999999</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Limpiezas Manchegas S.L.</cbc:Name>
+                    </cac:PartyName>
+                </cac:WinningParty>
+                <cac:AwardedTenderedProject>
+                    <cac:LegalMonetaryTotal>
+                        <cbc:PayableAmount currencyID="EUR">72000</cbc:PayableAmount>
+                        <cbc:TaxInclusiveAmount currencyID="EUR">87120</cbc:TaxInclusiveAmount>
+                    </cac:LegalMonetaryTotal>
+                </cac:AwardedTenderedProject>
+            </cac-place-ext:TenderResult>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+    <!-- Entry 3: NO CLM - La Rioja -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/12345003</id>
+        <link href="https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&amp;idEvl=test3"/>
+        <summary type="text">Id licitación: LR-2026/001; Órgano de Contratación: Ayuntamiento de Logroño; Importe: 50000 EUR; Estado: PUB</summary>
+        <title>Obras de pavimentación en Logroño</title>
+        <updated>2026-03-01T09:00:00.000+01:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>LR-2026/001</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">PUB</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">P2608900C</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Ayuntamiento de Logroño</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Obras de pavimentación en Logroño</cbc:Name>
+                <cbc:TypeCode>3</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">50000</cbc:TaxExclusiveAmount>
+                    <cbc:TotalAmount currencyID="EUR">60500</cbc:TotalAmount>
+                </cac:BudgetAmount>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentity>La Rioja</cbc:CountrySubentity>
+                    <cbc:CountrySubentityCode>ES230</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+</feed>

@@ -1,0 +1,19 @@
+{
+	frankenphp
+	auto_https off
+}
+
+:80 {
+	root * /app/public
+	encode zstd gzip
+	php_server
+	file_server
+}
+
+:443 {
+	tls /etc/ssl/certs/selfsigned.crt /etc/ssl/private/selfsigned.key
+	root * /app/public
+	encode zstd gzip
+	php_server
+	file_server
+}

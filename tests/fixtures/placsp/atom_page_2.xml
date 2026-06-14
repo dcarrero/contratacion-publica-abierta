@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cbc="urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2" xmlns:cac-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2" xmlns:cbc-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonBasicComponents-2">
+    <id>https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_20260301_120000.atom</id>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_20260301_120000.atom" rel="self"/>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom" rel="first"/>
+    <title>Licitaciones - Test Page 2</title>
+    <updated>2026-03-01T12:00:00.000+01:00</updated>
+    <!-- Entry 4: CLM - Albacete -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/12345004</id>
+        <link href="https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&amp;idEvl=test4"/>
+        <summary type="text">Id licitación: AB-2026/010; Órgano de Contratación: Diputación de Albacete; Importe: 200000 EUR; Estado: PUB</summary>
+        <title>Obra de mejora de caminos rurales en la provincia de Albacete</title>
+        <updated>2026-02-28T16:00:00.000+01:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>AB-2026/010</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">PUB</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="DIR3">LA0001234</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">P0200000D</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Diputación Provincial de Albacete</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Obra de mejora de caminos rurales en la provincia de Albacete</cbc:Name>
+                <cbc:TypeCode>3</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">200000</cbc:TaxExclusiveAmount>
+                    <cbc:TotalAmount currencyID="EUR">242000</cbc:TotalAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>45233120</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentity>Albacete</cbc:CountrySubentity>
+                    <cbc:CountrySubentityCode>ES421</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+                <cac:PlannedPeriod>
+                    <cbc:DurationMeasure unitCode="MON">6</cbc:DurationMeasure>
+                </cac:PlannedPeriod>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+                <cac:TenderSubmissionDeadlinePeriod>
+                    <cbc:EndDate>2026-03-30</cbc:EndDate>
+                </cac:TenderSubmissionDeadlinePeriod>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+    <!-- Entry 5: NO CLM - Madrid -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/12345005</id>
+        <link href="https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&amp;idEvl=test5"/>
+        <summary type="text">Id licitación: MAD-2026/100; Órgano de Contratación: Comunidad de Madrid; Importe: 500000 EUR; Estado: PUB</summary>
+        <title>Servicio de mantenimiento de parques en Madrid</title>
+        <updated>2026-02-28T10:00:00.000+01:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>MAD-2026/100</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">PUB</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">S2800001J</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Comunidad de Madrid</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Servicio de mantenimiento de parques en Madrid</cbc:Name>
+                <cbc:TypeCode>2</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">500000</cbc:TaxExclusiveAmount>
+                    <cbc:TotalAmount currencyID="EUR">605000</cbc:TotalAmount>
+                </cac:BudgetAmount>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentity>Madrid</cbc:CountrySubentity>
+                    <cbc:CountrySubentityCode>ES300</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+</feed>
