@@ -39,23 +39,27 @@ class InformeDataBuilder
      */
     public function buildProvincia(Provincia $provincia): array
     {
+        // Sin anomalías: la radiografía no las muestra y su cálculo (EXISTS anidado sobre anomalías)
+        // es el paso más caro (>10s). Si en el futuro se muestran, optimizar buildAnomaliasResumen.
         return array_merge([
             'nuts' => $provincia->nuts,
             'nombre' => $provincia->nombre,
             'comunidad' => $provincia->comunidadAutonoma?->nombre,
             'generado_at' => now()->toIso8601String(),
-        ], $this->buildGeoReport("{$provincia->nuts}%", $provincia->poblacion));
+        ], $this->buildGeoReport("{$provincia->nuts}%", $provincia->poblacion, includeAnomalias: false));
     }
 
     /**
      * Cuerpo común del informe geográfico (CCAA o provincia): KPIs, per cápita, evolución,
      * distribución, top CPV/adjudicatarios/organismos y anomalías, filtrando por $nutsLike.
      */
-    private function buildGeoReport(string $nutsLike, ?int $poblacion): array
+    private function buildGeoReport(string $nutsLike, ?int $poblacion, bool $includeAnomalias = true): array
     {
+        [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
+
         // KPIs
         $kpis = DB::table('contratos')
-            ->where('nuts', 'LIKE', $nutsLike)
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
             ->selectRaw('COUNT(*) as total_contratos')
             ->selectRaw('COALESCE(SUM(importe_adjudicacion), 0) as total_importe')
             ->selectRaw(SqlDialect::sumBool('es_menor').' as total_menores')
@@ -64,19 +68,16 @@ class InformeDataBuilder
         $totalContratos = (int) $kpis->total_contratos;
         $totalImporte = (float) $kpis->total_importe;
 
-        $totalOrganismos = (int) DB::table('organismos')
-            ->whereExists(function ($q) use ($nutsLike) {
-                $q->select(DB::raw(1))->from('contratos')
-                    ->whereColumn('contratos.organismo_id', 'organismos.id')
-                    ->where('contratos.nuts', 'LIKE', $nutsLike);
-            })->count();
+        // Conteos distintos directamente desde los contratos de la zona (un solo scan por rango de
+        // índice sobre nuts), en vez de subconsultas correlacionadas sobre las tablas completas.
+        $distintos = DB::table('contratos')
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->selectRaw('COUNT(DISTINCT organismo_id) as organismos')
+            ->selectRaw('COUNT(DISTINCT adjudicatario_id) as adjudicatarios')
+            ->first();
 
-        $totalAdjudicatarios = (int) DB::table('adjudicatarios')
-            ->whereExists(function ($q) use ($nutsLike) {
-                $q->select(DB::raw(1))->from('contratos')
-                    ->whereColumn('contratos.adjudicatario_id', 'adjudicatarios.id')
-                    ->where('contratos.nuts', 'LIKE', $nutsLike);
-            })->count();
+        $totalOrganismos = (int) $distintos->organismos;
+        $totalAdjudicatarios = (int) $distintos->adjudicatarios;
 
         $pctMenores = $totalContratos > 0
             ? round((int) $kpis->total_menores / $totalContratos * 100, 1)
@@ -87,7 +88,7 @@ class InformeDataBuilder
 
         // Evolución anual
         $evolucionAnual = DB::table('contratos')
-            ->where('nuts', 'LIKE', $nutsLike)
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
             ->whereNotNull('fecha_publicacion')
             ->selectRaw("{$this->yearExpr} as year, COUNT(*) as num_contratos, COALESCE(SUM(importe_adjudicacion), 0) as total_importe")
             ->groupByRaw($this->yearExpr)
@@ -111,7 +112,7 @@ class InformeDataBuilder
         $topAdj = config('contratacion.informes.top_adjudicatarios', 20);
         $topAdjudicatarios = DB::table('contratos')
             ->join('adjudicatarios', 'contratos.adjudicatario_id', '=', 'adjudicatarios.id')
-            ->where('contratos.nuts', 'LIKE', $nutsLike)
+            ->where('contratos.nuts', '>=', $nLow)->where('contratos.nuts', '<', $nHigh)
             ->select('adjudicatarios.nombre', 'adjudicatarios.nif')
             ->selectRaw('COUNT(*) as total_contratos')
             ->selectRaw('COALESCE(SUM(contratos.importe_adjudicacion), 0) as total_importe')
@@ -132,7 +133,7 @@ class InformeDataBuilder
         $topOrg = config('contratacion.informes.top_organismos', 20);
         $topOrganismos = DB::table('contratos')
             ->join('organismos', 'contratos.organismo_id', '=', 'organismos.id')
-            ->where('contratos.nuts', 'LIKE', $nutsLike)
+            ->where('contratos.nuts', '>=', $nLow)->where('contratos.nuts', '<', $nHigh)
             ->select('organismos.nombre', 'organismos.nif')
             ->selectRaw('COUNT(*) as total_contratos')
             ->selectRaw('COALESCE(SUM(contratos.importe_adjudicacion), 0) as total_importe')
@@ -149,8 +150,10 @@ class InformeDataBuilder
             ->values()
             ->all();
 
-        // Anomalías resumen
-        $anomaliasResumen = $this->buildAnomaliasResumen($nutsLike);
+        // Anomalías resumen (omitible: es el paso más caro y no todas las vistas lo usan)
+        $anomaliasResumen = $includeAnomalias
+            ? $this->buildAnomaliasResumen($nutsLike)
+            : ['total' => 0, 'fraccionamiento' => 0, 'concentracion' => 0, 'pico_temporal' => 0];
 
         return [
             'kpis' => [
@@ -315,8 +318,9 @@ class InformeDataBuilder
     {
         $tipos = config('contratacion.tipos_contrato', []);
 
+        [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
         $rawTipos = DB::table('contratos')
-            ->where('nuts', 'LIKE', $nutsLike)
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
             ->selectRaw('tipo_contrato, COUNT(*) as num_contratos, COALESCE(SUM(importe_adjudicacion), 0) as total_importe')
             ->groupBy('tipo_contrato')
             ->get();
@@ -393,8 +397,10 @@ class InformeDataBuilder
     {
         $cpvDivisiones = config('contratacion.cpv_divisiones', []);
 
+        [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
+
         return DB::table('contratos')
-            ->where('nuts', 'LIKE', $nutsLike)
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
             ->whereNotNull('cpv')
             ->where('cpv', '!=', '')
             ->selectRaw(SqlDialect::left('cpv', 2).' as cpv2, COUNT(*) as num_contratos, COALESCE(SUM(importe_adjudicacion), 0) as total_importe')
@@ -438,9 +444,10 @@ class InformeDataBuilder
 
     private function buildAnomaliasResumen(string $nutsLike): array
     {
-        $base = Anomalia::whereHas('organismo', function ($q) use ($nutsLike) {
-            $q->whereHas('contratos', function ($q2) use ($nutsLike) {
-                $q2->where('nuts', 'LIKE', $nutsLike);
+        [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
+        $base = Anomalia::whereHas('organismo', function ($q) use ($nLow, $nHigh) {
+            $q->whereHas('contratos', function ($q2) use ($nLow, $nHigh) {
+                $q2->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh);
             });
         });
 
@@ -457,5 +464,21 @@ class InformeDataBuilder
     private function yearExprAnomalia(): string
     {
         return SqlDialect::year('created_at');
+    }
+
+    /**
+     * Convierte un patrón de prefijo NUTS ('ES611%') en límites de rango ['ES611', 'ES612') para
+     * que el filtro use el índice btree con parámetros — un LIKE de prefijo parametrizado no lo usa
+     * y acaba escaneando los 8M de contratos.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function nutsBounds(string $nutsLike): array
+    {
+        $low = rtrim($nutsLike, '%');
+        $last = substr($low, -1);
+        $high = substr($low, 0, -1).chr(ord($last) + 1);
+
+        return [$low, $high];
     }
 }

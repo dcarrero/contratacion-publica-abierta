@@ -42,9 +42,11 @@ class RadiografiaController extends Controller
 
         abort_if($provincia === null || $provincia->nuts === null, 404);
 
+        // Caché mensual: la radiografía apenas cambia y el cálculo es pesado sobre ~8M contratos.
+        // Se refresca al expirar o al limpiar la caché tras un sync grande.
         $data = Cache::remember(
             "radiografia:{$provincia->id}",
-            3600,
+            now()->addMonth(),
             fn () => $builder->buildProvincia($provincia)
         );
 

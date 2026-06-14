@@ -3,6 +3,15 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.2.1] - 2026-06-14
+
+### Corregido
+
+- **Rendimiento de la Radiografía por provincia**: las páginas podían agotar el tiempo de ejecución
+  (error 500) en bases de datos grandes. Se filtra por rango de código NUTS (usa índice) en lugar de
+  `LIKE` de prefijo, se añade un índice de patrón sobre `nuts` (PostgreSQL) y se evita el cálculo más
+  costoso (anomalías) en esta vista. La radiografía se cachea durante un mes.
+
 ## [1.2.0] - 2026-06-14
 
 ### Añadido
