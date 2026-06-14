@@ -10,7 +10,6 @@ use App\Models\Contrato;
 use App\Models\FuenteDatos;
 use App\Models\Organismo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -239,8 +238,115 @@ class MergeMaskedAdjudicatariosTest extends TestCase
     }
 
     // ----------------------------------------------------------------
+    // Case 7: HARDENING — same digits + shared GENERIC prefix but different
+    // full surnames → NO merge. (The old matcher merged these via a 4-char
+    // prefix anchor, the main source of false positives that disabled the
+    // scheduler. Now requires full-token "apellidos completos" match.)
+    // ----------------------------------------------------------------
+
+    public function test_shared_prefix_but_different_full_name_does_not_merge(): void
+    {
+        // Both have "7045" in the NIF and start with "CONSTRUCCIONES", but the
+        // distinctive surname differs → two different firms, must NOT merge.
+        $real = $this->adjudicatario('B53704599', 'CONSTRUCCIONES GARCIA SL', contratos: 5, importe: 50000);
+        $masked = $this->adjudicatario('*** 7045 **', 'CONSTRUCCIONES LOPEZ SL', contratos: 2, importe: 10000);
+        $contrato = $this->contrato($masked->id);
+
+        $this->artisan('nif:merge-masked')->assertExitCode(0);
+
+        $this->assertNotNull(Adjudicatario::find($masked->id), 'Distinct firms sharing a prefix must NOT merge');
+        $contrato->refresh();
+        $this->assertSame($masked->id, $contrato->adjudicatario_id);
+    }
+
+    // ----------------------------------------------------------------
+    // Case 8: HARDENING — a single shared generic token is not enough.
+    // ----------------------------------------------------------------
+
+    public function test_single_shared_generic_token_does_not_merge(): void
+    {
+        // Masked reduces to one token {gestion}; real has more tokens. A lone
+        // generic word must not glue them even with a digit match.
+        $real = $this->adjudicatario('B53704599', 'GESTION INTEGRAL DE RESIDUOS SL', contratos: 4, importe: 40000);
+        $masked = $this->adjudicatario('*** 7045 **', 'GESTION SL', contratos: 1, importe: 5000);
+        $contrato = $this->contrato($masked->id);
+
+        $this->artisan('nif:merge-masked')->assertExitCode(0);
+
+        $this->assertNotNull(Adjudicatario::find($masked->id), 'A single generic token must NOT trigger a merge');
+        $contrato->refresh();
+        $this->assertSame($masked->id, $contrato->adjudicatario_id);
+    }
+
+    // ----------------------------------------------------------------
+    // Case 9: HARDENING — real is a person's DNI (not a company CIF) →
+    // NO merge, even with exact name + matching digits. Individuals must
+    // stay separate (PLACSP privacy / out of scope).
+    // ----------------------------------------------------------------
+
+    public function test_person_dni_real_is_never_a_merge_target(): void
+    {
+        // Real "31678950S" is a DNI (person), exact same name, digits 7895 present.
+        $real = $this->adjudicatario('31678950S', 'MIGUEL ANGEL GONZALEZ ROMAN', contratos: 5, importe: 50000);
+        $masked = $this->adjudicatario('***7895**', 'MIGUEL ANGEL GONZALEZ ROMAN', contratos: 2, importe: 8000);
+        $contrato = $this->contrato($masked->id);
+
+        $this->artisan('nif:merge-masked')->assertExitCode(0);
+
+        $this->assertNotNull(Adjudicatario::find($masked->id), 'A person DNI must never be a merge target');
+        $contrato->refresh();
+        $this->assertSame($masked->id, $contrato->adjudicatario_id);
+    }
+
+    // ----------------------------------------------------------------
     // Unit tests for helper methods
     // ----------------------------------------------------------------
+
+    public function test_is_company_nif_distinguishes_cif_from_persons(): void
+    {
+        $cmd = new MergeMaskedAdjudicatarios;
+
+        // Company CIFs
+        $this->assertTrue($cmd->isCompanyNif('B53704599'));
+        $this->assertTrue($cmd->isCompanyNif('A11704589'));
+        $this->assertTrue($cmd->isCompanyNif('Q2800001A'));
+
+        // Persons / invalid → false
+        $this->assertFalse($cmd->isCompanyNif('31678950S'));  // DNI
+        $this->assertFalse($cmd->isCompanyNif('Y5237548W'));  // NIE
+        $this->assertFalse($cmd->isCompanyNif('XXX2667XX'));  // anonymised
+        $this->assertFalse($cmd->isCompanyNif('***7895**'));  // masked
+    }
+
+    public function test_names_are_similar_requires_full_tokens(): void
+    {
+        $cmd = new MergeMaskedAdjudicatarios;
+
+        // Same two distinctive tokens (different legal form / accents) → similar.
+        $this->assertTrue($cmd->namesAreSimilar(
+            'AIRE NETWORKS DEL MEDITERRÁNEO S.L.U.',
+            'Aire Networks del Mediterraneo, SL'
+        ));
+
+        // Shared generic prefix token, different surname → NOT similar.
+        $this->assertFalse($cmd->namesAreSimilar('CONSTRUCCIONES GARCIA SL', 'CONSTRUCCIONES LOPEZ SL'));
+
+        // A single shared generic token → NOT similar.
+        $this->assertFalse($cmd->namesAreSimilar('GESTION SL', 'GESTION INTEGRAL DE RESIDUOS SL'));
+
+        // Only legal-form/noise tokens remain → NOT similar.
+        $this->assertFalse($cmd->namesAreSimilar('SL', 'SA'));
+    }
+
+    public function test_significant_tokens_drops_legal_forms_and_short_words(): void
+    {
+        $cmd = new MergeMaskedAdjudicatarios;
+
+        $this->assertSame(
+            ['aire', 'networks', 'mediterraneo'],
+            $cmd->significantTokens('AIRE NETWORKS DEL MEDITERRÁNEO, S.L.U.')
+        );
+    }
 
     public function test_extract_visible_digits_returns_null_below_threshold(): void
     {

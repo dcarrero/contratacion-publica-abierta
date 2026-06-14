@@ -27,8 +27,7 @@ class FixDataQuality extends Command
 
         $totalFixed += $this->fixDates00XX($dryRun, $prefix);
         $totalFixed += $this->fixDatesSentinel($dryRun, $prefix);
-        $totalFixed += $this->fixDatesVeryOld($dryRun, $prefix);
-        $totalFixed += $this->fixDatesFuture($dryRun, $prefix);
+        $totalFixed += $this->fixDatesOutOfRange($dryRun, $prefix);
         $totalFixed += $this->fixCylImportes($dryRun, $prefix);
         $totalFixed += $this->fixAndaNuts($dryRun, $prefix);
         $totalFixed += $this->fixAndaFechasFromFormalizacion($dryRun, $prefix);
@@ -99,63 +98,44 @@ class FixDataQuality extends Command
     }
 
     /**
-     * Fechas muy antiguas (< 1900) → NULL
+     * Fechas fuera de rango → NULL en TODAS las columnas de fecha.
+     *
+     * Año < 1900 (basura del origen) o futuro imposible distorsionan las gráficas.
+     * El límite superior es dinámico (año actual + 1), no un literal, para no tener
+     * que tocar el código cada enero. fecha_limite admite hasta 2100 porque los
+     * plazos de presentación pueden ser legítimamente futuros.
      */
-    private function fixDatesVeryOld(bool $dryRun, string $prefix): int
+    private function fixDatesOutOfRange(bool $dryRun, string $prefix): int
     {
-        $dateText = SqlDialect::isPgsql() ? 'fecha_adjudicacion::TEXT' : 'fecha_adjudicacion';
-        $yearExpr = 'CAST('.SqlDialect::left($dateText, 4).' AS INTEGER)';
+        $maxNormal = (int) date('Y') + 1;
 
-        $count = DB::selectOne("
-            SELECT COUNT(*) as c FROM contratos
-            WHERE fecha_adjudicacion IS NOT NULL
-            AND {$yearExpr} > 0
-            AND {$yearExpr} < 1900
-        ")->c;
+        // columna => [añoMín, añoMáx]
+        $columns = [
+            'fecha_publicacion' => [1900, $maxNormal],
+            'fecha_adjudicacion' => [1900, $maxNormal],
+            'fecha_formalizacion' => [1900, $maxNormal],
+            'fecha_limite' => [1900, 2100],
+        ];
 
-        $this->line("{$prefix}Fechas antiguas (< 1900) → NULL: {$count} registros");
+        $total = 0;
 
-        if ($count > 0 && ! $dryRun) {
-            DB::update("
-                UPDATE contratos
-                SET fecha_adjudicacion = NULL
-                WHERE fecha_adjudicacion IS NOT NULL
-                AND {$yearExpr} > 0
-                AND {$yearExpr} < 1900
-            ");
-            $this->info("  Corregidos: {$count}");
+        foreach ($columns as $col => [$min, $max]) {
+            $yearExpr = SqlDialect::yearInt($col);
+            $where = "{$col} IS NOT NULL AND ({$yearExpr} < {$min} OR {$yearExpr} > {$max})";
+
+            $count = DB::selectOne("SELECT COUNT(*) as c FROM contratos WHERE {$where}")->c;
+
+            $this->line("{$prefix}{$col} fuera de rango [{$min}-{$max}] → NULL: {$count} registros");
+
+            if ($count > 0 && ! $dryRun) {
+                DB::update("UPDATE contratos SET {$col} = NULL WHERE {$where}");
+                $this->info("  Corregidos: {$count}");
+            }
+
+            $total += $count;
         }
 
-        return $count;
-    }
-
-    /**
-     * Fechas futuras (> 2027) → NULL (excepto las que puedan ser duración de contrato)
-     */
-    private function fixDatesFuture(bool $dryRun, string $prefix): int
-    {
-        $dateText = SqlDialect::isPgsql() ? 'fecha_adjudicacion::TEXT' : 'fecha_adjudicacion';
-        $yearExpr = 'CAST('.SqlDialect::left($dateText, 4).' AS INTEGER)';
-
-        $count = DB::selectOne("
-            SELECT COUNT(*) as c FROM contratos
-            WHERE fecha_adjudicacion IS NOT NULL
-            AND {$yearExpr} > 2027
-        ")->c;
-
-        $this->line("{$prefix}Fechas futuras (> 2027) → NULL: {$count} registros");
-
-        if ($count > 0 && ! $dryRun) {
-            DB::update("
-                UPDATE contratos
-                SET fecha_adjudicacion = NULL
-                WHERE fecha_adjudicacion IS NOT NULL
-                AND {$yearExpr} > 2027
-            ");
-            $this->info("  Corregidos: {$count}");
-        }
-
-        return $count;
+        return $total;
     }
 
     /**

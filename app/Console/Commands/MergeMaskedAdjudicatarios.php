@@ -163,6 +163,19 @@ class MergeMaskedAdjudicatarios extends Command
     }
 
     /**
+     * True si el NIF es un CIF de empresa: letra de organización + 7 dígitos + control.
+     * Excluye DNIs (8 dígitos + letra) y NIEs (X/Y/Z + 7 dígitos + letra), que son personas
+     * físicas y NO deben fusionarse (privacidad PLACSP, fuera de alcance). También descarta
+     * NIFs anonimizados con X (p.ej. "XXX2667XX") que no son un real válido.
+     */
+    public function isCompanyNif(string $nif): bool
+    {
+        $nif = mb_strtoupper(trim($nif));
+
+        return preg_match('/^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/', $nif) === 1;
+    }
+
+    /**
      * Extract visible digits from a masked NIF.
      * e.g. "*** 7045 **" → "7045", "*****4329**" → "4329"
      * Returns null if fewer than 4 digits found.
@@ -175,45 +188,75 @@ class MergeMaskedAdjudicatarios extends Command
     }
 
     /**
-     * Determine if two normalized names share strong similarity.
-     * Strategy: the shorter name must be a prefix/substring of the longer,
-     * OR they share the same first significant token (≥4 chars).
+     * Tokens de forma jurídica y ruido que NO distinguen una empresa de otra.
+     * Se descartan antes de comparar nombres (un nombre = sus tokens distintivos).
+     *
+     * @var list<string>
      */
-    public function namesAreSimilar(string $normA, string $normB): bool
+    private const NOISE_TOKENS = [
+        'sl', 'slu', 'sa', 'sau', 'slne', 'sll', 'srl', 'slp', 'aie', 'ute',
+        'scoop', 'scl', 'scp', 'sccl', 'sat', 'sad', 'spa',
+        'sociedad', 'sociedades', 'limitada', 'anonima', 'unipersonal', 'cooperativa',
+        'sdad', 'soc', 'civil', 'mercantil', 'profesional', 'responsabilidad', 'laboral',
+        'del', 'las', 'los', 'para', 'con', 'por',
+    ];
+
+    /**
+     * Descompone un nombre en sus tokens significativos: palabras en minúscula, sin acentos,
+     * de ≥3 caracteres, que no sean forma jurídica ni ruido. Es la base del match por
+     * "apellidos completos" — exigimos coincidencia de palabras enteras, no de prefijos.
+     *
+     * @return list<string>
+     */
+    public function significantTokens(string $name): array
     {
-        if ($normA === '' || $normB === '') {
-            return false;
-        }
+        $name = mb_strtolower($name);
+        $name = strtr($name, [
+            'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u',
+            'ü' => 'u', 'ñ' => 'n', 'ç' => 'c', 'à' => 'a', 'è' => 'e',
+        ]);
+        $name = (string) preg_replace('/[^a-z0-9]+/', ' ', $name);
 
-        // Substring check: shorter must be fully contained in longer
-        $shorter = mb_strlen($normA) <= mb_strlen($normB) ? $normA : $normB;
-        $longer = mb_strlen($normA) <= mb_strlen($normB) ? $normB : $normA;
+        $tokens = array_filter(
+            explode(' ', $name),
+            fn (string $t): bool => mb_strlen($t) >= 3 && ! in_array($t, self::NOISE_TOKENS, true)
+        );
 
-        if (str_contains($longer, $shorter) && mb_strlen($shorter) >= 4) {
-            return true;
-        }
-
-        // First significant token check (≥4 chars)
-        $tokenA = $this->firstSignificantToken($normA);
-        $tokenB = $this->firstSignificantToken($normB);
-
-        return $tokenA !== null && $tokenB !== null && $tokenA === $tokenB;
+        return array_values(array_unique($tokens));
     }
 
     /**
-     * Return the first token of ≥4 characters from a normalized name.
+     * Determina si dos nombres son la misma empresa con seguridad alta (para confirmar
+     * el match por dígitos del NIF). Estrategia de "apellidos completos":
+     *   - Cada token significativo del nombre más corto debe aparecer ENTERO en el más largo.
+     *   - Se exigen ≥2 tokens compartidos; si el nombre corto tiene un solo token, solo se
+     *     acepta cuando ambos nombres se reducen al mismo conjunto (evita que una palabra
+     *     genérica suelta —"construcciones"— pegue dos empresas distintas).
      */
-    private function firstSignificantToken(string $norm): ?string
+    public function namesAreSimilar(string $nameA, string $nameB): bool
     {
-        // The normalized name has no spaces (stripped in normalize()), so treat every 4-char chunk
-        // as a "token" is not feasible. We work on the original characters by treating the
-        // normalized string itself: the first 4+ chars that form a contiguous run of letters/digits.
-        if (mb_strlen($norm) < 4) {
-            return null;
+        $a = $this->significantTokens($nameA);
+        $b = $this->significantTokens($nameB);
+
+        if ($a === [] || $b === []) {
+            return false;
         }
 
-        // Return first 4 characters as a minimal anchor
-        return mb_substr($norm, 0, 4);
+        [$short, $long] = count($a) <= count($b) ? [$a, $b] : [$b, $a];
+
+        foreach ($short as $token) {
+            if (! in_array($token, $long, true)) {
+                return false;
+            }
+        }
+
+        // ≥2 tokens distintivos compartidos → match fuerte.
+        if (count($short) >= 2) {
+            return true;
+        }
+
+        // Un solo token: solo si ambos nombres son exactamente ese mismo token.
+        return $a === $b;
     }
 
     /**
@@ -232,7 +275,8 @@ class MergeMaskedAdjudicatarios extends Command
                 ->where('nombre_normalizado', $maskedNorm)
                 ->first();
 
-            if ($real !== null) {
+            // Solo empresas: nunca fusionar contra un DNI/NIE de persona física.
+            if ($real !== null && $this->isCompanyNif($real->nif)) {
                 return $real;
             }
         }
@@ -252,12 +296,11 @@ class MergeMaskedAdjudicatarios extends Command
             return null;
         }
 
-        // Filter by name similarity
-        $matches = $candidates->filter(function ($candidate) use ($maskedNorm) {
-            $candidateNorm = $candidate->nombre_normalizado ?? $this->normalize($candidate->nombre);
-
-            return $this->namesAreSimilar($maskedNorm, $candidateNorm);
-        });
+        // Solo empresas (CIF) + similitud de nombre por tokens completos ("apellidos completos").
+        $matches = $candidates->filter(
+            fn ($candidate) => $this->isCompanyNif($candidate->nif)
+                && $this->namesAreSimilar($masked->nombre, $candidate->nombre)
+        );
 
         if ($matches->count() === 1) {
             return $matches->first();

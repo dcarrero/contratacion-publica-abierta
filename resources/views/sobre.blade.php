@@ -433,13 +433,20 @@
             </section>
 
             <section>
-                <h2 class="text-lg font-semibold text-gray-900 mb-2">Código fuente y catálogo de fuentes</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">Código abierto y autoalojamiento</h2>
                 <p>
-                    El catálogo de fuentes de datos de contratación pública, con enlaces directos a 40+ archivos
-                    ZIP descargables y ejemplos de código, está disponible en
+                    Este portal es <strong>software libre</strong> (licencia MIT). Puedes consultar el código,
+                    proponer mejoras o <strong>montarlo tú mismo</strong> con tus propios datos en
+                    <a href="https://github.com/dcarrero/contratacion-publica-abierta" target="_blank" rel="noopener" class="text-primary hover:text-primary-dark underline">github.com/dcarrero/contratacion-publica-abierta</a>.
+                    El repositorio incluye instrucciones de instalación (Laravel 12 + PostgreSQL 17) y un
+                    despliegue con Docker (FrankenPHP) listo para usar.
+                </p>
+                <p class="mt-2">
+                    Aparte, el <strong>catálogo de fuentes</strong> de datos de contratación pública —con enlaces
+                    directos a 40+ archivos ZIP descargables y ejemplos de código— está en
                     <a href="https://contratacionabierta.com" target="_blank" rel="noopener" class="text-primary hover:text-primary-dark underline">ContratacionAbierta.com</a>
-                    y su código fuente es abierto en
-                    <a href="https://github.com/dcarrero/ContratacionAbierta" target="_blank" rel="noopener" class="text-primary hover:text-primary-dark underline">GitHub</a>.
+                    (código en
+                    <a href="https://github.com/dcarrero/ContratacionAbierta" target="_blank" rel="noopener" class="text-primary hover:text-primary-dark underline">GitHub</a>).
                 </p>
             </section>
 

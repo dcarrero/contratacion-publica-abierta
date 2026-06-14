@@ -103,11 +103,16 @@ Schedule::command('regional:sync-ast')
     ->withoutOverlapping()
     ->appendOutputTo($syncLog);
 
-// === Normalización de adjudicatarios (DESACTIVADO) ===
-// nif:merge-masked NO se programa automáticamente: el tier de match por dígitos
-// produce falsos positivos (fusiona personas/empresas distintas con nombre similar).
-// Ejecutar SOLO manualmente con --dry-run y revisar antes de aplicar. Reactivar
-// únicamente cuando el matcher esté endurecido (solo empresas + apellidos completos).
+// === Mantenimiento de calidad de datos y normalización (mensual) ===
+// data:fix-quality NULL-ea fechas fuera de rango (año <1900 o futuro imposible) en
+// las 4 columnas de fecha, además de otras correcciones idempotentes. Mensual de momento
+// (los syncs apenas introducen fechas basura nuevas); subir a semanal/diario si reaparecen.
+
+Schedule::command('data:fix-quality')
+    ->monthlyOn(1, '06:30')  // Día 1 del mes, 06:30 (tras los syncs)
+    ->withoutOverlapping()
+    ->appendOutputTo($syncLog);
+
 
 // === Stats y análisis (diario, tras syncs) ===
 

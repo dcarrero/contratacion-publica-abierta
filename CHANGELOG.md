@@ -3,6 +3,23 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.1.0] - 2026-06-14
+
+### Calidad de datos y normalización
+
+- **`data:fix-quality`**: ahora normaliza a NULL las fechas fuera de rango (año < 1900 o futuro
+  imposible) en **todas** las columnas de fecha, no solo en la de adjudicación. El límite superior
+  es dinámico (año actual + 1); `fecha_limite` admite hasta 2100 (plazos legítimamente futuros).
+  Añadido al planificador con cadencia mensual.
+- **`nif:merge-masked`**: matcher de adjudicatarios enmascarados endurecido. La confirmación de
+  nombre exige coincidencia de palabras completas ("apellidos completos") en lugar de un prefijo,
+  y la fusión se restringe a CIF de empresa: nunca se fusionan personas físicas (DNI/NIE), UTEs ni
+  identificadores anonimizados. Elimina los falsos positivos previos.
+
+### Documentación
+
+- Página "Sobre" del portal: documenta el repositorio público y el autoalojamiento (MIT).
+
 ## [1.0.0] - 2026-06-14
 
 ### Primera publicación pública (open source, MIT)

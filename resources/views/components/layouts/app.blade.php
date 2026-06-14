@@ -120,7 +120,7 @@
                     <a href="{{ route('rss.contratos') }}" class="text-gray-300 hover:text-white underline" title="Feed RSS">
                         RSS
                     </a>
-                    <a href="https://github.com/dcarrero/contratacion-publica-clm-es" target="_blank" rel="noopener" class="text-gray-300 hover:text-white underline">
+                    <a href="https://github.com/dcarrero/contratacion-publica-abierta" target="_blank" rel="noopener" class="text-gray-300 hover:text-white underline">
                         GitHub
                     </a>
                 </p>
