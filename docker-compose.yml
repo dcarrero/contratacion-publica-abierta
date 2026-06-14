@@ -13,10 +13,11 @@ services:
 
   postgres:
     image: pgvector/pgvector:pg17
+    # La contraseña se lee de .env.docker (POSTGRES_PASSWORD); no se versiona en claro.
+    env_file: .env.docker
     environment:
       POSTGRES_DB: contratacion
       POSTGRES_USER: contratacion
-      POSTGRES_PASSWORD: contratacion
     ports:
       - "5433:5432"
     volumes:

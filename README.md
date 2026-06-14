@@ -9,8 +9,8 @@ Portal de transparencia en contratación pública de toda España. Recopila, nor
 
 ## Consulta pública
 
-Si no quieres montarlo tú mismo, puedes consultar el portal en vivo en: **[próximamente]**
-*(dominio por confirmar)*.
+Si no quieres montarlo tú mismo, podrás consultar los datos en **[contratacionabierta.com](https://contratacionabierta.com/)**.
+*(Próximamente: la web final con los datos para consulta pública.)*
 
 ## Datos actuales
 
@@ -124,6 +124,8 @@ por CCAA/anuales con exportación CSV y PDF.
 - [Plataforma de Contratación del Sector Público (PLACSP)](https://contrataciondelestado.es) — fuente oficial estatal.
 - Portales de datos abiertos de las CCAA (enlazados en cada comando regional).
 - Especificación CODICE (formato de sindicación de PLACSP).
+- [ContratacionAbierta.com](https://contratacionabierta.com/) — más portales libres y código para consultar
+  datos públicos de forma sencilla, sin sufrir las webs oficiales (a menudo poco usables).
 
 ## Autor
 
