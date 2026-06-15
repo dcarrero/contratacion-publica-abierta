@@ -3,6 +3,14 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.5.0] - 2026-06-15
+
+### Añadido
+
+- **Sitemap (`/sitemap.xml`) y `robots.txt`** para mejorar la indexación en buscadores: incluye las
+  secciones, las radiografías por provincia y año, y los informes por CCAA. `robots.txt` referencia el
+  sitemap usando el dominio configurado.
+
 ## [1.4.0] - 2026-06-15
 
 ### Añadido

@@ -24,6 +24,7 @@ use App\Http\Controllers\OrganismoController;
 use App\Http\Controllers\RadiografiaController;
 use App\Http\Controllers\RankingsController;
 use App\Http\Controllers\RssController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', DashboardController::class)->name('dashboard');
@@ -47,6 +48,10 @@ Route::get('/radiografia/{slug}/{year?}', [RadiografiaController::class, 'show']
     ->name('radiografia.show');
 Route::get('/sobre', fn () => view('sobre'))->name('sobre');
 Route::get('/aviso-legal', fn () => view('aviso-legal'))->name('aviso-legal');
+
+// SEO
+Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 // Alertas y suscripciones (rate limited)
 Route::middleware('throttle:10,1')->group(function (): void {
