@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Provincia;
 use App\Services\InformeDataBuilder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -35,17 +36,21 @@ class RadiografiaController extends Controller
         return view('radiografia.index', ['provincias' => $provincias]);
     }
 
-    public function show(string $slug, Request $request, InformeDataBuilder $builder): View
+    public function show(string $slug, Request $request, InformeDataBuilder $builder, ?string $year = null): View|RedirectResponse
     {
+        // Redirige la URL antigua ?year=YYYY a la forma SEO con el año en la ruta (301).
+        if ($year === null && ctype_digit((string) $request->query('year', ''))) {
+            return redirect()->route('radiografia.show', ['slug' => $slug, 'year' => $request->query('year')], 301);
+        }
+
         $provincia = Provincia::with('comunidadAutonoma:id,nombre')
             ->get()
             ->first(fn (Provincia $p) => Str::slug($p->nombre) === $slug);
 
         abort_if($provincia === null || $provincia->nuts === null, 404);
 
-        // Año opcional (?year=2024): vista anual con comparación YoY. Validado al rango razonable.
-        $year = $request->query('year');
-        $year = (is_string($year) && ctype_digit($year)) ? (int) $year : null;
+        // Año opcional (/radiografia/{slug}/{year}): vista anual con comparación YoY. Validado al rango.
+        $year = ($year !== null && ctype_digit($year)) ? (int) $year : null;
         if ($year !== null && ($year < 2008 || $year > (int) date('Y') + 1)) {
             $year = null;
         }

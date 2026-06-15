@@ -3,6 +3,24 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.4.0] - 2026-06-15
+
+### Añadido
+
+- **Análisis en la ficha de organismo**: índice de concentración de proveedores (Herfindahl) y porcentaje
+  de adjudicaciones sin concurrencia (una sola oferta), como señales de transparencia.
+
+### Cambiado
+
+- **URLs de la radiografía por año** más amigables para buscadores: el año va en la ruta
+  (`/radiografia/cadiz/2025`) en lugar de como parámetro (`?year=2025`). La forma antigua redirige (301).
+
+### Corregido
+
+- **Rendimiento de las fichas de organismo y empresa**: el listado de "últimos contratos" ordenaba muchas
+  filas sin índice adecuado (varios segundos en entidades grandes). Se añaden índices compuestos
+  `(organismo_id, fecha_publicacion)` y `(adjudicatario_id, fecha_publicacion)`.
+
 ## [1.3.0] - 2026-06-15
 
 ### Añadido

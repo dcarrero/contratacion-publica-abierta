@@ -35,13 +35,43 @@ class OrganismoController extends Controller
                 ->first();
 
             $total = (int) $agg->total;
+            $importeTotal = (float) ($agg->importe_total ?? 0);
+
+            // % sin concurrencia (una sola oferta) sobre los contratos que declaran num_ofertas.
+            $ofertas = Contrato::forOrganismo($organismo->id)
+                ->whereNotNull('num_ofertas')
+                ->selectRaw('COUNT(*) as con_dato')
+                ->selectRaw('SUM(CASE WHEN num_ofertas = 1 THEN 1 ELSE 0 END) as una_oferta')
+                ->first();
+            $conDato = (int) ($ofertas->con_dato ?? 0);
+            $pctSinConcurrencia = $conDato > 0
+                ? round(((int) $ofertas->una_oferta) / $conDato * 100, 1)
+                : null;
+
+            // Índice Herfindahl (HHI) de concentración de proveedores por importe: 0–10.000.
+            // <1.500 competencia, 1.500–2.500 moderada, >2.500 alta dependencia de pocos proveedores.
+            $hhi = null;
+            if ($importeTotal > 0) {
+                $sub = Contrato::forOrganismo($organismo->id)
+                    ->whereNotNull('adjudicatario_id')
+                    ->groupBy('adjudicatario_id')
+                    ->selectRaw('SUM(importe_adjudicacion) as imp');
+                $sumSq = (float) DB::query()->fromSub($sub, 't')
+                    ->selectRaw('COALESCE(SUM(imp * imp), 0) as s')->value('s');
+                $hhi = (int) round($sumSq / ($importeTotal ** 2) * 10000);
+            }
+            $hhiLabel = $hhi === null ? null : ($hhi > 2500 ? 'Alta' : ($hhi >= 1500 ? 'Moderada' : 'Baja'));
 
             return [
                 'kpis' => [
                     'total_contratos' => $total,
-                    'importe_total' => $agg->importe_total ?? 0,
+                    'importe_total' => $importeTotal,
                     'adjudicatarios_distintos' => (int) $agg->adjudicatarios_distintos,
                     'pct_menores' => $total > 0 ? round((int) $agg->total_menores / $total * 100, 1) : 0,
+                    'pct_sin_concurrencia' => $pctSinConcurrencia,
+                    'contratos_con_num_ofertas' => $conDato,
+                    'concentracion_hhi' => $hhi,
+                    'concentracion_label' => $hhiLabel,
                 ],
                 'top_adjudicatarios' => Contrato::forOrganismo($organismo->id)
                     ->select('adjudicatario_id', DB::raw('COUNT(*) as num_contratos'), DB::raw('SUM(importe_adjudicacion) as total_importe'))

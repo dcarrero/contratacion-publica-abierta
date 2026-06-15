@@ -60,6 +60,34 @@
         </div>
     </section>
 
+    {{-- Análisis: concurrencia y concentración de proveedores --}}
+    @if($ficha['kpis']['pct_sin_concurrencia'] !== null || $ficha['kpis']['concentracion_hhi'] !== null)
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        @if($ficha['kpis']['pct_sin_concurrencia'] !== null)
+        <div class="bg-white rounded-lg shadow p-5">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">% adjudicaciones sin concurrencia</p>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $ficha['kpis']['pct_sin_concurrencia'] }}%</p>
+            <p class="text-xs text-gray-400 mt-1">
+                Una sola oferta, sobre {{ number_format($ficha['kpis']['contratos_con_num_ofertas'], 0, ',', '.') }}
+                contratos que declaran número de ofertas.
+            </p>
+        </div>
+        @endif
+        @if($ficha['kpis']['concentracion_hhi'] !== null)
+        <div class="bg-white rounded-lg shadow p-5">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Concentración de proveedores</p>
+            <p class="text-2xl font-bold text-gray-900 mt-1">
+                {{ $ficha['kpis']['concentracion_label'] }}
+                <span class="text-base font-normal text-gray-400">(HHI {{ number_format($ficha['kpis']['concentracion_hhi'], 0, ',', '.') }})</span>
+            </p>
+            <p class="text-xs text-gray-400 mt-1">
+                Índice Herfindahl por importe (0–10.000). Más alto = mayor dependencia de pocos adjudicatarios.
+            </p>
+        </div>
+        @endif
+    </section>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {{-- Top 10 adjudicatarios --}}
         <section>

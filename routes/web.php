@@ -41,7 +41,10 @@ Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.ind
 Route::get('/empresas/{adjudicatario:nif}', [EmpresaController::class, 'show'])->name('empresas.show');
 // La ruta /empresas/{nif}/informe.pdf vive en el módulo privado app/Informes (no público).
 Route::get('/radiografia', [RadiografiaController::class, 'index'])->name('radiografia.index');
-Route::get('/radiografia/{slug}', [RadiografiaController::class, 'show'])->name('radiografia.show');
+// {year?} en la ruta (SEO: /radiografia/cadiz/2025) en vez de ?year=. whereNumber evita colisiones.
+Route::get('/radiografia/{slug}/{year?}', [RadiografiaController::class, 'show'])
+    ->whereNumber('year')
+    ->name('radiografia.show');
 Route::get('/sobre', fn () => view('sobre'))->name('sobre');
 Route::get('/aviso-legal', fn () => view('aviso-legal'))->name('aviso-legal');
 

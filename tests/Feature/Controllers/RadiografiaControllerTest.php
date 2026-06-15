@@ -122,12 +122,22 @@ class RadiografiaControllerTest extends TestCase
         $this->assertEqualsWithDelta(100.0, $data['comparativa']['importe']['delta_pct'], 0.1);
     }
 
-    public function test_show_con_year_devuelve_200(): void
+    public function test_show_con_year_en_la_ruta_devuelve_200(): void
     {
         $provincia = $this->provinciaConNuts();
         $slug = Str::slug($provincia->nombre);
 
-        $this->get("/radiografia/{$slug}?year=2024")->assertStatus(200);
+        $this->get("/radiografia/{$slug}/2024")->assertStatus(200);
+    }
+
+    public function test_query_year_antiguo_redirige_a_url_seo(): void
+    {
+        $provincia = $this->provinciaConNuts();
+        $slug = Str::slug($provincia->nombre);
+
+        $this->get("/radiografia/{$slug}?year=2024")
+            ->assertStatus(301)
+            ->assertRedirect("/radiografia/{$slug}/2024");
     }
 
     public function test_index_devuelve_200(): void

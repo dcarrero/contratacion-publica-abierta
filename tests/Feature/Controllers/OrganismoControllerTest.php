@@ -72,6 +72,39 @@ class OrganismoControllerTest extends TestCase
         $response->assertViewHas('ficha');
     }
 
+    public function test_ficha_calcula_concentracion_hhi_y_sin_concurrencia(): void
+    {
+        $organismo = Organismo::create(['nif' => 'P4502000B', 'nombre' => 'Diputación Test HHI']);
+        $a = Adjudicatario::create(['nif' => 'B02100001', 'nombre' => 'Proveedor A SL']);
+        $b = Adjudicatario::create(['nif' => 'B02100002', 'nombre' => 'Proveedor B SL']);
+        $fuente = $this->createFuente();
+
+        $mk = function (int $adjId, float $importe, ?int $ofertas) use ($organismo, $fuente) {
+            static $n = 0;
+            $n++;
+            Contrato::create([
+                'placsp_id' => 'ORG-HHI-'.$n,
+                'url_placsp' => 'https://example.com/h'.$n,
+                'organismo_id' => $organismo->id,
+                'adjudicatario_id' => $adjId,
+                'importe_adjudicacion' => $importe,
+                'num_ofertas' => $ofertas,
+                'fuente_datos_id' => $fuente->id,
+                'version' => 1,
+            ]);
+        };
+
+        // A: 80.000 (1 oferta) · B: 20.000 (3 ofertas) → shares 0,8/0,2 → HHI=6800 (Alta); sin conc.=50%
+        $mk($a->id, 80000, 1);
+        $mk($b->id, 20000, 3);
+
+        $ficha = $this->get("/organismos/{$organismo->nif}")->assertStatus(200)->viewData('ficha');
+
+        $this->assertSame(6800, $ficha['kpis']['concentracion_hhi']);
+        $this->assertSame('Alta', $ficha['kpis']['concentracion_label']);
+        $this->assertEqualsWithDelta(50.0, $ficha['kpis']['pct_sin_concurrencia'], 0.1);
+    }
+
     public function test_show_organismo_sin_contratos_devuelve_200_sin_error(): void
     {
         $organismo = Organismo::create([
