@@ -3,6 +3,22 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.6.0] - 2026-06-15
+
+### Añadido
+
+- **Comparador de provincias** (`/comparar`): compara dos provincias lado a lado (contratos, importe,
+  importe por habitante, % de contratos menores, organismos, adjudicatarios) con el valor mayor resaltado
+  y los principales adjudicatarios de cada una. Enlazado desde la radiografía y en el sitemap.
+- **Datos estructurados (JSON-LD)**: identidad del sitio (Organization) y migas de navegación
+  (BreadcrumbList) en radiografía, empresa, organismo y contrato, para resultados enriquecidos en buscadores.
+
+### Cambiado
+
+- **Metadatos SEO por página**: descripción única, enlace canónico y etiquetas Open Graph/Twitter en cada
+  página (radiografía, empresa, organismo, contrato), mejorando los snippets y las previsualizaciones al
+  compartir enlaces.
+
 ## [1.5.0] - 2026-06-15
 
 ### Añadido

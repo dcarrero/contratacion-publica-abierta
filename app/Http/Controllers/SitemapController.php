@@ -36,7 +36,7 @@ class SitemapController extends Controller
 
         // Secciones principales.
         foreach (['dashboard', 'contratos.index', 'organismos.index', 'empresas.index', 'mapa',
-            'analisis', 'radiografia.index', 'informes.index', 'administraciones.index', 'sobre'] as $name) {
+            'analisis', 'radiografia.index', 'comparar.index', 'informes.index', 'administraciones.index', 'sobre'] as $name) {
             $urls[] = [route($name), 'weekly'];
         }
 

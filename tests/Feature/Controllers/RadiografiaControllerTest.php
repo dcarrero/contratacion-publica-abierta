@@ -152,7 +152,9 @@ class RadiografiaControllerTest extends TestCase
 
         $this->get("/radiografia/{$slug}")
             ->assertStatus(200)
-            ->assertSee($provincia->nombre);
+            ->assertSee($provincia->nombre)
+            ->assertSee('rel="canonical"', false)
+            ->assertSee('name="description"', false);
     }
 
     public function test_show_provincia_inexistente_devuelve_404(): void

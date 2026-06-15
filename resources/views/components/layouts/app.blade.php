@@ -8,15 +8,31 @@
     <title>{{ $title ?? 'Contratación Abierta' }}</title>
     <meta name="description" content="{{ $metaDescription ?? 'Portal de transparencia en contratación pública de España. Contratos de administraciones públicas estatales, autonómicas y locales.' }}">
 
+    <link rel="canonical" href="{{ url()->current() }}">
+
     <meta property="og:title" content="{{ $title ?? 'Contratación Abierta' }}">
     <meta property="og:description" content="{{ $metaDescription ?? 'Portal de transparencia en contratación pública de España.' }}">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="es_ES">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="{{ config('contratacion.sitio.nombre', 'Contratación Abierta') }}">
+    <meta name="twitter:card" content="summary">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet">
 
     <link rel="alternate" type="application/rss+xml" title="Contratación Abierta — Últimos contratos" href="{{ route('rss.contratos') }}">
+
+    {{-- Identidad del sitio (schema.org) --}}
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => config('contratacion.sitio.nombre', 'Contratación Abierta'),
+        'url' => config('contratacion.sitio.url', url('/')),
+        'description' => 'Portal de transparencia en contratación pública de España.',
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')

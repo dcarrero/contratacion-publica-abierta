@@ -12,6 +12,7 @@ use App\Http\Controllers\AdministracionController;
 use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\AnomaliaController;
+use App\Http\Controllers\ComparadorController;
 use App\Http\Controllers\ContratoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmpresaController;
@@ -46,6 +47,8 @@ Route::get('/radiografia', [RadiografiaController::class, 'index'])->name('radio
 Route::get('/radiografia/{slug}/{year?}', [RadiografiaController::class, 'show'])
     ->whereNumber('year')
     ->name('radiografia.show');
+Route::get('/comparar', [ComparadorController::class, 'index'])->name('comparar.index');
+Route::get('/comparar/{a}/{b}', [ComparadorController::class, 'show'])->name('comparar.show');
 Route::get('/sobre', fn () => view('sobre'))->name('sobre');
 Route::get('/aviso-legal', fn () => view('aviso-legal'))->name('aviso-legal');
 

@@ -1,4 +1,15 @@
-<x-layouts.app :title="$organismo->nombre . ' — Contratación Abierta'">
+@php
+    $metaDesc = $organismo->nombre.' (NIF '.$organismo->nif.'): '
+        .number_format($ficha['kpis']['total_contratos'], 0, ',', '.').' contratos públicos'
+        .(! empty($ficha['kpis']['importe_total']) ? ' por '.formatImporteCorto($ficha['kpis']['importe_total']) : '')
+        .'. Principales proveedores, concentración y evolución del gasto.';
+@endphp
+<x-layouts.app :title="$organismo->nombre . ' — Contratación Abierta'" :metaDescription="$metaDesc">
+
+    <x-seo.breadcrumb :items="[
+        ['name' => 'Organismos', 'url' => route('organismos.index')],
+        ['name' => $organismo->nombre, 'url' => url()->current()],
+    ]" />
 
     {{-- Breadcrumb --}}
     <nav class="text-sm text-gray-500 mb-4">

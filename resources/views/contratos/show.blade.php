@@ -1,4 +1,15 @@
-<x-layouts.app :title="Str::limit($contrato->objeto, 60) . ' — Contratación Abierta'">
+@php
+    $metaDesc = \Illuminate\Support\Str::limit($contrato->objeto, 120)
+        .($contrato->organismo ? ' · '.$contrato->organismo->nombre : '')
+        .($contrato->importe_adjudicacion ? ' · '.formatImporte($contrato->importe_adjudicacion) : '')
+        .($contrato->adjudicatario ? ' · Adjudicado a '.$contrato->adjudicatario->nombre : '');
+@endphp
+<x-layouts.app :title="Str::limit($contrato->objeto, 60) . ' — Contratación Abierta'" :metaDescription="$metaDesc">
+
+    <x-seo.breadcrumb :items="[
+        ['name' => 'Contratos', 'url' => route('contratos.index')],
+        ['name' => $contrato->expediente ?? $contrato->placsp_id, 'url' => url()->current()],
+    ]" />
 
     {{-- Breadcrumb --}}
     <nav class="text-sm text-gray-500 mb-4">

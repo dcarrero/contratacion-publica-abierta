@@ -1,4 +1,16 @@
-<x-layouts.app title="Radiografía de {{ $provincia->nombre }}: contratación pública — Contratación Abierta">
+@php
+    $metaDesc = 'Contratación pública adjudicada en '.$provincia->nombre.($year ? ' en '.$year : '')
+        .': '.number_format($data['kpis']['total_contratos'], 0, ',', '.').' contratos'
+        .(! empty($data['kpis']['total_importe']) ? ', '.formatImporteCorto($data['kpis']['total_importe']) : '')
+        .(! empty($data['kpis']['gasto_per_capita']) ? ' ('.formatImporte($data['kpis']['gasto_per_capita']).'/hab.)' : '')
+        .'. Principales adjudicatarios, organismos y evolución anual.';
+@endphp
+<x-layouts.app title="Radiografía de {{ $provincia->nombre }}{{ $year ? ' '.$year : '' }}: contratación pública — Contratación Abierta" :metaDescription="$metaDesc">
+
+    <x-seo.breadcrumb :items="[
+        ['name' => 'Radiografía', 'url' => route('radiografia.index')],
+        ['name' => $provincia->nombre . ($year ? ' ' . $year : ''), 'url' => url()->current()],
+    ]" />
 
     <div class="max-w-5xl mx-auto">
         {{-- Breadcrumb --}}

@@ -2,10 +2,15 @@
 
     <div class="max-w-5xl mx-auto">
         <h1 class="text-2xl font-bold text-gray-900 mb-2">Radiografía por provincia</h1>
-        <p class="text-gray-600 mb-8 max-w-3xl">
+        <p class="text-gray-600 mb-4 max-w-3xl">
             ¿Cuánto dinero público se adjudica en tu provincia y a quién? Elige una provincia para ver el
             gasto contratado, el importe por habitante, los principales adjudicatarios y organismos, y su
             evolución. Datos de fuentes oficiales (PLACSP y portales de datos abiertos).
+        </p>
+        <p class="mb-8">
+            <a href="{{ route('comparar.index') }}" class="text-primary hover:underline text-sm font-medium">
+                ¿Prefieres comparar dos provincias lado a lado? →
+            </a>
         </p>
 
         @foreach($provincias as $comunidad => $lista)
