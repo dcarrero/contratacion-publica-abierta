@@ -119,6 +119,9 @@
         {{-- Evolución anual --}}
         @if(!empty($data['evolucion_anual']))
         <h2 class="text-lg font-semibold text-gray-900 mb-3">Evolución anual</h2>
+        <div class="bg-white rounded-lg shadow p-4 mb-4" style="height: 320px;">
+            <canvas id="radChartEvolucion"></canvas>
+        </div>
         <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
@@ -207,5 +210,36 @@
         </p>
         @endif
     </div>
+
+    @if(!empty($data['evolucion_anual']))
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const evData = @json(array_values($data['evolucion_anual']));
+        const fmt = v => v >= 1e9 ? (v / 1e9).toFixed(1) + ' MM€' : v >= 1e6 ? (v / 1e6).toFixed(1) + ' M€' : v >= 1e3 ? (v / 1e3).toFixed(0) + ' K€' : v + ' €';
+        new Chart(document.getElementById('radChartEvolucion'), {
+            data: {
+                labels: evData.map(d => d.year),
+                datasets: [
+                    { type: 'bar', label: 'Contratos', data: evData.map(d => d.num_contratos), backgroundColor: 'rgba(220,38,38,0.7)', yAxisID: 'y', order: 2 },
+                    { type: 'line', label: 'Importe', data: evData.map(d => d.total_importe), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, tension: 0.3, yAxisID: 'y1', order: 1 },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    y: { position: 'left', ticks: { callback: v => v >= 1e6 ? (v / 1e6).toFixed(0) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'K' : v } },
+                    y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: v => fmt(v) } },
+                },
+            },
+        });
+    });
+    </script>
+    @endpush
+    @endif
 
 </x-layouts.app>

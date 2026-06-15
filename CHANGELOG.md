@@ -3,7 +3,20 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.7.0] - 2026-06-15
+
+### Añadido
+
+- **Gráfica de evolución anual** en la radiografía de provincia: barras (contratos) y línea (importe) con
+  doble eje, además de la tabla de datos.
+
 ## [1.6.1] - 2026-06-15
+
+### Añadido
+
+- **Comando `radiografia:warm`** para precalentar la caché mensual de las radiografías de provincia
+  (con `--years`, también las vistas anuales). Cubre además todo el comparador, que reutiliza la misma
+  caché. Programado mensual.
 
 ### Corregido
 
