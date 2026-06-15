@@ -445,19 +445,26 @@ class InformeDataBuilder
     private function buildAnomaliasResumen(string $nutsLike): array
     {
         [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
-        $base = Anomalia::whereHas('organismo', function ($q) use ($nLow, $nHigh) {
-            $q->whereHas('contratos', function ($q2) use ($nLow, $nHigh) {
-                $q2->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh);
-            });
-        });
 
-        $total = (int) (clone $base)->count();
+        // Organismos con contratos en la zona: semi-join (IN subconsulta) que usa el rango de índice
+        // sobre nuts, en vez de un EXISTS doblemente anidado (anomalía→organismo→contratos) que
+        // generaba planes inestables de >10s. Un único conteo agrupado por tipo, no cuatro.
+        $organismoIds = DB::table('contratos')
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->whereNotNull('organismo_id')
+            ->select('organismo_id')
+            ->distinct();
+
+        $counts = Anomalia::whereIn('organismo_id', $organismoIds)
+            ->groupBy('tipo')
+            ->selectRaw('tipo, COUNT(*) as c')
+            ->pluck('c', 'tipo');
 
         return [
-            'total' => $total,
-            'fraccionamiento' => (int) (clone $base)->where('tipo', 'fraccionamiento')->count(),
-            'concentracion' => (int) (clone $base)->where('tipo', 'concentracion')->count(),
-            'pico_temporal' => (int) (clone $base)->where('tipo', 'pico_temporal')->count(),
+            'total' => (int) $counts->sum(),
+            'fraccionamiento' => (int) ($counts['fraccionamiento'] ?? 0),
+            'concentracion' => (int) ($counts['concentracion'] ?? 0),
+            'pico_temporal' => (int) ($counts['pico_temporal'] ?? 0),
         ];
     }
 

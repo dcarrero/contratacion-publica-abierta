@@ -3,6 +3,19 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.2.2] - 2026-06-15
+
+### Corregido
+
+- **Rendimiento del resumen de anomalías** en los informes por CCAA: el cálculo usaba subconsultas
+  anidadas con planes inestables (>10s); ahora emplea un semi-join sobre los organismos de la zona
+  (~2s). Acelera la generación de los informes.
+
+### Añadido
+
+- Variables de entorno opcionales `SITIO_NOMBRE` / `SITIO_DOMINIO` / `SITIO_URL` documentadas en los
+  `.env.example` para personalizar la marca del sitio (informes PDF, etc.) en autoalojamiento.
+
 ## [1.2.1] - 2026-06-14
 
 ### Corregido
