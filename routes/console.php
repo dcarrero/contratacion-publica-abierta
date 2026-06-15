@@ -120,6 +120,14 @@ Schedule::command('stats:recalculate')
     ->dailyAt('07:00')
     ->appendOutputTo($syncLog);
 
+// Precalienta la caché mensual de radiografías de provincia (cubre también todo el comparador,
+// que reutiliza la misma caché por provincia). Mensual, tras stats, en segundo plano.
+Schedule::command('radiografia:warm --years')
+    ->monthlyOn(1, '07:30')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo($syncLog);
+
 // === Anomalías y alertas ===
 
 Schedule::command('anomalias:detectar')

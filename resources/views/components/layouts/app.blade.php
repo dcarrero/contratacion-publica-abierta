@@ -154,5 +154,9 @@
     </footer>
 
     @stack('scripts')
+
+    {{-- Carga Livewire + Alpine en TODAS las páginas (Livewire solo autoinyecta donde hay componente;
+         sin esto, las directivas Alpine —menú móvil, comparador— no funcionan en páginas estáticas). --}}
+    @livewireScripts
 </body>
 </html>

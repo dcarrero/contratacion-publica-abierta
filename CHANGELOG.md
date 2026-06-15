@@ -3,6 +3,14 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.6.1] - 2026-06-15
+
+### Corregido
+
+- **Botón "Comparar" y menú móvil sin funcionar** en las páginas que no tienen componente Livewire: Alpine.js
+  no se cargaba en ellas. Ahora se carga en todas las páginas, por lo que el comparador navega correctamente
+  y el menú móvil responde.
+
 ## [1.6.0] - 2026-06-15
 
 ### Añadido
