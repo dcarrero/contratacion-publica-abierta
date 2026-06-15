@@ -37,29 +37,45 @@ class InformeDataBuilder
      * Radiografía de una provincia (A4): mismo informe geográfico que CCAA pero filtrado por
      * el NUTS3 de la provincia y con su población. Contenido público de transparencia.
      */
-    public function buildProvincia(Provincia $provincia): array
+    public function buildProvincia(Provincia $provincia, ?int $year = null): array
     {
+        $nutsLike = "{$provincia->nuts}%";
+
         // Sin anomalías: la radiografía no las muestra y su cálculo (EXISTS anidado sobre anomalías)
         // es el paso más caro (>10s). Si en el futuro se muestran, optimizar buildAnomaliasResumen.
-        return array_merge([
+        $report = array_merge([
             'nuts' => $provincia->nuts,
             'nombre' => $provincia->nombre,
             'comunidad' => $provincia->comunidadAutonoma?->nombre,
             'generado_at' => now()->toIso8601String(),
-        ], $this->buildGeoReport("{$provincia->nuts}%", $provincia->poblacion, includeAnomalias: false));
+            'year' => $year,
+            'anios_disponibles' => $this->aniosDisponibles($nutsLike),
+        ], $this->buildGeoReport($nutsLike, $provincia->poblacion, includeAnomalias: false, year: $year));
+
+        // Comparación con el año anterior (YoY) cuando se filtra por un año.
+        if ($year !== null) {
+            $report['comparativa'] = $this->comparativaGeoYear($nutsLike, $provincia->poblacion, $year);
+        }
+
+        return $report;
     }
 
     /**
      * Cuerpo común del informe geográfico (CCAA o provincia): KPIs, per cápita, evolución,
      * distribución, top CPV/adjudicatarios/organismos y anomalías, filtrando por $nutsLike.
      */
-    private function buildGeoReport(string $nutsLike, ?int $poblacion, bool $includeAnomalias = true): array
+    private function buildGeoReport(string $nutsLike, ?int $poblacion, bool $includeAnomalias = true, ?int $year = null): array
     {
         [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
+
+        // Filtro de año opcional (se aplica a KPIs/tops, no a la evolución que es la serie completa).
+        $yearFilter = fn ($q) => $q->whereNotNull('fecha_publicacion')
+            ->whereRaw("{$this->yearExpr} = ?", [(string) $year]);
 
         // KPIs
         $kpis = DB::table('contratos')
             ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->when($year !== null, $yearFilter)
             ->selectRaw('COUNT(*) as total_contratos')
             ->selectRaw('COALESCE(SUM(importe_adjudicacion), 0) as total_importe')
             ->selectRaw(SqlDialect::sumBool('es_menor').' as total_menores')
@@ -72,6 +88,7 @@ class InformeDataBuilder
         // índice sobre nuts), en vez de subconsultas correlacionadas sobre las tablas completas.
         $distintos = DB::table('contratos')
             ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->when($year !== null, $yearFilter)
             ->selectRaw('COUNT(DISTINCT organismo_id) as organismos')
             ->selectRaw('COUNT(DISTINCT adjudicatario_id) as adjudicatarios')
             ->first();
@@ -103,16 +120,17 @@ class InformeDataBuilder
             ->all();
 
         // Distribución por tipo
-        $distribucionTipo = $this->buildDistribucionTipo($nutsLike);
+        $distribucionTipo = $this->buildDistribucionTipo($nutsLike, $year);
 
         // Top CPV
-        $topCpv = $this->buildTopCpv($nutsLike, config('contratacion.informes.top_cpv', 10));
+        $topCpv = $this->buildTopCpv($nutsLike, config('contratacion.informes.top_cpv', 10), $year);
 
         // Top adjudicatarios
         $topAdj = config('contratacion.informes.top_adjudicatarios', 20);
         $topAdjudicatarios = DB::table('contratos')
             ->join('adjudicatarios', 'contratos.adjudicatario_id', '=', 'adjudicatarios.id')
             ->where('contratos.nuts', '>=', $nLow)->where('contratos.nuts', '<', $nHigh)
+            ->when($year !== null, $yearFilter)
             ->select('adjudicatarios.nombre', 'adjudicatarios.nif')
             ->selectRaw('COUNT(*) as total_contratos')
             ->selectRaw('COALESCE(SUM(contratos.importe_adjudicacion), 0) as total_importe')
@@ -134,6 +152,7 @@ class InformeDataBuilder
         $topOrganismos = DB::table('contratos')
             ->join('organismos', 'contratos.organismo_id', '=', 'organismos.id')
             ->where('contratos.nuts', '>=', $nLow)->where('contratos.nuts', '<', $nHigh)
+            ->when($year !== null, $yearFilter)
             ->select('organismos.nombre', 'organismos.nif')
             ->selectRaw('COUNT(*) as total_contratos')
             ->selectRaw('COALESCE(SUM(contratos.importe_adjudicacion), 0) as total_importe')
@@ -314,13 +333,14 @@ class InformeDataBuilder
         ];
     }
 
-    private function buildDistribucionTipo(string $nutsLike): array
+    private function buildDistribucionTipo(string $nutsLike, ?int $year = null): array
     {
         $tipos = config('contratacion.tipos_contrato', []);
 
         [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
         $rawTipos = DB::table('contratos')
             ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->when($year !== null, fn ($q) => $q->whereNotNull('fecha_publicacion')->whereRaw("{$this->yearExpr} = ?", [(string) $year]))
             ->selectRaw('tipo_contrato, COUNT(*) as num_contratos, COALESCE(SUM(importe_adjudicacion), 0) as total_importe')
             ->groupBy('tipo_contrato')
             ->get();
@@ -393,7 +413,7 @@ class InformeDataBuilder
             ->all();
     }
 
-    private function buildTopCpv(string $nutsLike, int $limit): array
+    private function buildTopCpv(string $nutsLike, int $limit, ?int $year = null): array
     {
         $cpvDivisiones = config('contratacion.cpv_divisiones', []);
 
@@ -401,6 +421,7 @@ class InformeDataBuilder
 
         return DB::table('contratos')
             ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->when($year !== null, fn ($q) => $q->whereNotNull('fecha_publicacion')->whereRaw("{$this->yearExpr} = ?", [(string) $year]))
             ->whereNotNull('cpv')
             ->where('cpv', '!=', '')
             ->selectRaw(SqlDialect::left('cpv', 2).' as cpv2, COUNT(*) as num_contratos, COALESCE(SUM(importe_adjudicacion), 0) as total_importe')
@@ -471,6 +492,69 @@ class InformeDataBuilder
     private function yearExprAnomalia(): string
     {
         return SqlDialect::year('created_at');
+    }
+
+    /**
+     * Años con datos en la zona (para el selector de la radiografía). Descarta años basura.
+     *
+     * @return list<int>
+     */
+    private function aniosDisponibles(string $nutsLike): array
+    {
+        [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
+        $maxYear = (int) date('Y') + 1;
+
+        return DB::table('contratos')
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->whereNotNull('fecha_publicacion')
+            ->selectRaw("{$this->yearExpr} as year")
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->map(fn ($y) => (int) $y)
+            ->filter(fn ($y) => $y >= 2008 && $y <= $maxYear)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Comparación con el año anterior (YoY) de los totales de la zona: contratos, importe y per cápita.
+     */
+    private function comparativaGeoYear(string $nutsLike, ?int $poblacion, int $year): array
+    {
+        [$nLow, $nHigh] = $this->nutsBounds($nutsLike);
+
+        $kpiYear = fn (int $y) => DB::table('contratos')
+            ->where('nuts', '>=', $nLow)->where('nuts', '<', $nHigh)
+            ->whereNotNull('fecha_publicacion')
+            ->whereRaw("{$this->yearExpr} = ?", [(string) $y])
+            ->selectRaw('COUNT(*) as c, COALESCE(SUM(importe_adjudicacion), 0) as imp')
+            ->first();
+
+        $cur = $kpiYear($year);
+        $prev = $kpiYear($year - 1);
+
+        $deltaPct = fn (float $a, float $b): ?float => $b > 0 ? round(($a - $b) / $b * 100, 1) : null;
+        $perCapita = fn (float $imp): ?float => ($poblacion && $poblacion > 0) ? round($imp / $poblacion, 2) : null;
+
+        return [
+            'year' => $year,
+            'year_anterior' => $year - 1,
+            'contratos' => [
+                'actual' => (int) $cur->c,
+                'anterior' => (int) $prev->c,
+                'delta_pct' => $deltaPct((float) $cur->c, (float) $prev->c),
+            ],
+            'importe' => [
+                'actual' => (float) $cur->imp,
+                'anterior' => (float) $prev->imp,
+                'delta_pct' => $deltaPct((float) $cur->imp, (float) $prev->imp),
+            ],
+            'per_capita' => [
+                'actual' => $perCapita((float) $cur->imp),
+                'anterior' => $perCapita((float) $prev->imp),
+            ],
+        ];
     }
 
     /**

@@ -8,11 +8,63 @@
             <span class="text-gray-900">{{ $provincia->nombre }}</span>
         </nav>
 
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">Radiografía de {{ $provincia->nombre }}</h1>
-        <p class="text-gray-500 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-1">
+            Radiografía de {{ $provincia->nombre }}@if($year) <span class="text-primary">{{ $year }}</span>@endif
+        </h1>
+        <p class="text-gray-500 mb-4">
             Contratación pública adjudicada en la provincia
             @if($data['comunidad']) &bull; {{ $data['comunidad'] }} @endif
         </p>
+
+        {{-- Selector de año --}}
+        @if(!empty($data['anios_disponibles']))
+        <div class="flex flex-wrap gap-2 mb-6 text-sm">
+            <a href="{{ route('radiografia.show', $slug) }}"
+               class="px-3 py-1 rounded-full border {{ !$year ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-300 hover:border-primary' }}">
+                Todos
+            </a>
+            @foreach($data['anios_disponibles'] as $y)
+            <a href="{{ route('radiografia.show', ['slug' => $slug, 'year' => $y]) }}"
+               class="px-3 py-1 rounded-full border {{ $year === $y ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-300 hover:border-primary' }}">
+                {{ $y }}
+            </a>
+            @endforeach
+        </div>
+        @endif
+
+        {{-- Comparación con el año anterior (YoY) --}}
+        @if($year && !empty($data['comparativa']))
+        @php($cmp = $data['comparativa'])
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            @foreach([
+                ['Contratos', $cmp['contratos'], false],
+                ['Importe adjudicado', $cmp['importe'], true],
+            ] as [$label, $m, $esImporte])
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-xs text-gray-500 uppercase">{{ $label }} {{ $year }}</div>
+                <div class="text-xl font-bold text-gray-900">
+                    {{ $esImporte ? formatImporteCorto($m['actual']) : number_format($m['actual'], 0, ',', '.') }}
+                </div>
+                @if($m['delta_pct'] !== null)
+                <div class="text-xs mt-1 {{ $m['delta_pct'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                    {{ $m['delta_pct'] >= 0 ? '▲' : '▼' }} {{ number_format(abs($m['delta_pct']), 1, ',', '.') }}% vs {{ $cmp['year_anterior'] }}
+                </div>
+                @else
+                <div class="text-xs mt-1 text-gray-400">sin dato {{ $cmp['year_anterior'] }}</div>
+                @endif
+            </div>
+            @endforeach
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-xs text-gray-500 uppercase">Por habitante {{ $year }}</div>
+                <div class="text-xl font-bold text-gray-900">
+                    {{ $cmp['per_capita']['actual'] !== null ? formatImporte($cmp['per_capita']['actual']) : '—' }}
+                </div>
+                @if($cmp['per_capita']['anterior'] !== null)
+                <div class="text-xs mt-1 text-gray-400">{{ formatImporte($cmp['per_capita']['anterior']) }} en {{ $cmp['year_anterior'] }}</div>
+                @endif
+            </div>
+        </div>
+        @endif
 
         @if($data['kpis']['total_contratos'] === 0)
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-6 text-amber-800">

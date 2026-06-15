@@ -3,6 +3,14 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.3.0] - 2026-06-15
+
+### Añadido
+
+- **Radiografía por año con comparación interanual**: en la radiografía de cada provincia se puede elegir
+  un año (`?year=YYYY`) para ver sus cifras (contratos, importe, principales adjudicatarios y organismos,
+  sectores) y una comparación con el año anterior (variación en contratos, importe y gasto por habitante).
+
 ## [1.2.2] - 2026-06-15
 
 ### Corregido
