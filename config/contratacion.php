@@ -18,16 +18,6 @@ return [
         'url' => env('SITIO_URL', 'https://contratacionabierta.com'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Tema (diseño)
-    |--------------------------------------------------------------------------
-    | 'default' = diseño público sobrio (rojo); 'premium' = tema PRO (de pago).
-    | El tema premium SIEMPRE coexiste bajo el prefijo /pro. Con TEMA=premium, el
-    | módulo app/Premium monta además esas vistas en la raíz del dominio (deploy de
-    | pago). Todo el tema premium vive en app/Premium y se excluye del repo público.
-    */
-    'tema' => env('TEMA', 'default'),
 
 
     /*
