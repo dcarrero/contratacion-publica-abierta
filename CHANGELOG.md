@@ -3,6 +3,32 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.8.0] - 2026-07-10
+
+### Añadido
+
+- **Accesibilidad (WCAG 2.2 AA)**: enlace "Saltar al contenido", menús operables por teclado (con
+  `aria-expanded` y cierre con Escape), tablas de datos con cabeceras semánticas (`scope`) y descripción,
+  anuncio de resultados de búsqueda para lectores de pantalla (`aria-live`), foco visible en todos los
+  controles, mejor contraste de textos secundarios, iconos decorativos ocultos a la tecnología asistiva y
+  un único encabezado principal por página (panel y mapa).
+
+### Cambiado
+
+- **Búsquedas y filtros más rápidos**: el filtro por año y por comunidad autónoma ahora usan el índice de
+  la base de datos (rangos en vez de funciones sobre la columna), evitando recorrer toda la tabla.
+- **Exportación CSV más eficiente**: la descarga de contratos deja de hacer una consulta por fila
+  (organismo y adjudicatario se resuelven con un JOIN), reduciendo drásticamente la carga en exportaciones grandes.
+- **Importación por lotes** en el bootstrap de datos: inserción masiva resiliente (una fila defectuosa se
+  aísla sin abortar el lote), acelerando la carga inicial del dataset.
+
+### Seguridad
+
+- **Escapado de datos estructurados (JSON-LD)**: los nombres de organismos y empresas se escapan de forma
+  segura, evitando que un nombre malicioso pueda inyectar contenido en la página.
+- **Cabecera Content-Security-Policy** (modo report-only) como contención adicional frente a XSS.
+- **Límite de intentos** en el acceso al panel de administración (protección frente a fuerza bruta).
+
 ## [1.7.0] - 2026-06-15
 
 ### Añadido

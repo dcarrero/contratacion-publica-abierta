@@ -117,7 +117,7 @@ php artisan stats:recalculate
 
 Búsqueda full-text, mapa coroplético (Leaflet), análisis y gráficas (Chart.js), rankings con gasto
 per cápita, grafo de relaciones (D3.js), detección de anomalías, alertas por email y RSS, e informes
-por CCAA/anuales con exportación CSV y PDF.
+por CCAA/anuales con exportación CSV y PDF. Interfaz accesible (WCAG 2.2 AA).
 
 ## Referencias
 
