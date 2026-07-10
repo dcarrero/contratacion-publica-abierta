@@ -160,6 +160,8 @@ class BootstrapFromCsv extends Command
      */
     private function processChunk(array $chunk, ContratoImporter $importer, ?int $fuenteDatosId, bool $dryRun): void
     {
+        $batch = [];
+
         foreach ($chunk as $record) {
             $this->processed++;
 
@@ -188,17 +190,38 @@ class BootstrapFromCsv extends Command
                 continue;
             }
 
-            try {
-                $result = $importer->import($mapped);
+            $batch[] = $mapped;
+        }
 
-                match ($result) {
-                    'created' => $this->created++,
-                    'updated' => $this->updated++,
-                    'skipped' => $this->skipped++,
-                };
-            } catch (\Throwable $e) {
-                $this->errors++;
-                $this->warn("Fila {$this->processed}: {$e->getMessage()}");
+        if ($batch === []) {
+            return;
+        }
+
+        // Vuelca el lote con importBatch: resuelve organismos/adjudicatarios con caché,
+        // discrimina existentes con un único whereIn e inserta los nuevos en bloque (con
+        // fallback fila a fila si un INSERT falla). Preserva la semántica
+        // created/updated/skipped e historial de import().
+        try {
+            $counts = $importer->importBatch($batch);
+            $this->created += $counts['created'];
+            $this->updated += $counts['updated'];
+            $this->skipped += $counts['skipped'];
+            $this->errors += $counts['errors'];
+        } catch (\Throwable $e) {
+            // Fallo a nivel de lote fuera del INSERT resiliente (p. ej. resolución de
+            // organismo): degradar a fila a fila para no perder el chunk entero.
+            $this->warn("Lote degradado a fila a fila: {$e->getMessage()}");
+            foreach ($batch as $row) {
+                try {
+                    match ($importer->import($row)) {
+                        'created' => $this->created++,
+                        'updated' => $this->updated++,
+                        'skipped' => $this->skipped++,
+                    };
+                } catch (\Throwable $rowError) {
+                    $this->errors++;
+                    $this->warn("Fila (fallback): {$rowError->getMessage()}");
+                }
             }
         }
     }

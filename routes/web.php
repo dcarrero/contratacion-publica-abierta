@@ -89,7 +89,9 @@ Route::get('/rss/organismo/{nif}', [RssController::class, 'organismo'])->name('r
 // Admin
 Route::prefix('admin')->middleware('admin.ip')->group(function (): void {
     Route::get('/login', [AdminLoginController::class, 'showLogin'])->name('admin.login');
-    Route::post('/login', [AdminLoginController::class, 'login'])->name('admin.login.submit');
+    Route::post('/login', [AdminLoginController::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('admin.login.submit');
 
     Route::middleware('auth')->group(function (): void {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');

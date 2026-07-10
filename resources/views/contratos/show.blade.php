@@ -112,24 +112,25 @@
                 <h2 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Importes</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Importes de licitación y adjudicación, sin y con IVA</caption>
                         <thead>
                             <tr class="border-b border-gray-200">
-                                <th class="text-left py-2 pr-4 text-gray-500 font-medium"></th>
-                                <th class="text-right py-2 px-4 text-gray-500 font-medium">Sin IVA</th>
-                                <th class="text-right py-2 pl-4 text-gray-500 font-medium">Con IVA</th>
+                                <th scope="col" class="text-left py-2 pr-4 text-gray-500 font-medium"></th>
+                                <th scope="col" class="text-right py-2 px-4 text-gray-500 font-medium">Sin IVA</th>
+                                <th scope="col" class="text-right py-2 pl-4 text-gray-500 font-medium">Con IVA</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if($contrato->importe_licitacion || $contrato->importe_licitacion_con_iva)
                             <tr class="border-b border-gray-100">
-                                <td class="py-2.5 pr-4 text-gray-600">Licitación</td>
+                                <th scope="row" class="py-2.5 pr-4 text-gray-600 font-normal text-left">Licitación</th>
                                 <td class="py-2.5 px-4 text-right font-medium">{{ formatImporte($contrato->importe_licitacion) }}</td>
                                 <td class="py-2.5 pl-4 text-right font-medium">{{ formatImporte($contrato->importe_licitacion_con_iva) }}</td>
                             </tr>
                             @endif
                             @if($contrato->importe_adjudicacion || $contrato->importe_adjudicacion_con_iva)
                             <tr>
-                                <td class="py-2.5 pr-4 text-gray-600">Adjudicación</td>
+                                <th scope="row" class="py-2.5 pr-4 text-gray-600 font-normal text-left">Adjudicación</th>
                                 <td class="py-2.5 px-4 text-right font-semibold text-gray-900">{{ formatImporte($contrato->importe_adjudicacion) }}</td>
                                 <td class="py-2.5 pl-4 text-right font-semibold text-gray-900">{{ formatImporte($contrato->importe_adjudicacion_con_iva) }}</td>
                             </tr>
@@ -204,7 +205,7 @@
                         Ver en fuente oficial
                     </a>
                 @else
-                    <div class="text-xs text-gray-400 bg-gray-50 rounded p-3 mb-4">
+                    <div class="text-xs text-gray-500 bg-gray-50 rounded p-3 mb-4">
                         La fuente de datos de este contrato no proporciona enlace a la publicación original.
                     </div>
                 @endif

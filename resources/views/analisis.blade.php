@@ -37,11 +37,12 @@
                 <div class="mt-4 border-t pt-4">
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">
+                            <caption class="sr-only">Distribución por tipo de contrato</caption>
                             <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                                 <tr>
-                                    <th class="px-3 py-2 text-left">Tipo</th>
-                                    <th class="px-3 py-2 text-right">Contratos</th>
-                                    <th class="px-3 py-2 text-right">Importe</th>
+                                    <th scope="col" class="px-3 py-2 text-left">Tipo</th>
+                                    <th scope="col" class="px-3 py-2 text-right">Contratos</th>
+                                    <th scope="col" class="px-3 py-2 text-right">Importe</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -98,18 +99,19 @@
             </p>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Los 10 mayores adjudicatarios por importe</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">#</th>
-                            <th class="px-4 py-3 text-left">Adjudicatario</th>
-                            <th class="px-4 py-3 text-right">Contratos</th>
-                            <th class="px-4 py-3 text-right">Importe</th>
+                            <th scope="col" class="px-4 py-3 text-left">#</th>
+                            <th scope="col" class="px-4 py-3 text-left">Adjudicatario</th>
+                            <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($charts['concentracion']['top10'] as $i => $adj)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
                             <td class="px-4 py-3 font-medium text-gray-900">
                                 <a href="{{ route('empresas.show', $adj['nif']) }}" class="hover:text-primary hover:underline">{{ Str::limit($adj['nombre'], 60) }}</a>
                             </td>
@@ -123,7 +125,7 @@
         </div>
     </section>
 
-    <p class="text-xs text-gray-400 text-center">
+    <p class="text-xs text-gray-500 text-center">
         Datos generados el {{ \Carbon\Carbon::parse($charts['generado_at'])->format('d/m/Y H:i') }}.
         Fuente: <a href="https://contrataciondelestado.es" target="_blank" rel="noopener" class="underline hover:text-gray-600">PLACSP</a> y portales autonómicos.
     </p>

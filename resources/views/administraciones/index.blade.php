@@ -7,13 +7,14 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
+                <caption class="sr-only">Contratación pública por comunidad autónoma</caption>
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                     <tr>
-                        <th class="px-4 py-3 text-left">Comunidad Autónoma</th>
-                        <th class="px-4 py-3 text-right">Organismos</th>
-                        <th class="px-4 py-3 text-right">Contratos</th>
-                        <th class="px-4 py-3 text-right">Importe total</th>
-                        <th class="px-4 py-3 text-right">Per cápita</th>
+                        <th scope="col" class="px-4 py-3 text-left">Comunidad Autónoma</th>
+                        <th scope="col" class="px-4 py-3 text-right">Organismos</th>
+                        <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                        <th scope="col" class="px-4 py-3 text-right">Importe total</th>
+                        <th scope="col" class="px-4 py-3 text-right">Per cápita</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -23,7 +24,7 @@
                             <a href="{{ route('administraciones.show', $ca->nuts) }}" class="font-medium text-gray-900 hover:text-primary hover:underline">
                                 {{ $ca->nombre }}
                             </a>
-                            <span class="text-xs text-gray-400 ml-1">{{ $ca->nuts }}</span>
+                            <span class="text-xs text-gray-500 ml-1">{{ $ca->nuts }}</span>
                         </td>
                         <td class="px-4 py-3 text-right">{{ number_format($ca->stats_organismos, 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-right">{{ number_format($ca->stats_contratos, 0, ',', '.') }}</td>
@@ -32,7 +33,7 @@
                             @if($ca->stats_per_capita !== null)
                                 {{ formatImporteCorto($ca->stats_per_capita) }}/hab
                             @else
-                                <span class="text-gray-300">—</span>
+                                <span class="text-gray-500">—</span>
                             @endif
                         </td>
                     </tr>

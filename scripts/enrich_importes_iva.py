@@ -52,54 +52,62 @@ def enrich(input_path: str, db_path: str, dry_run: bool = False) -> None:
     df = df[df["importe_adj_con_iva"].notna()].copy()
     print(f"  Con importe_adj_con_iva: {len(df):,}")
 
-    # Leer IDs de contratos sin importe_adjudicacion_con_iva en BD
+    # Leer IDs de contratos sin importe_adjudicacion_con_iva en BD.
+    # try/finally garantiza que la conexión se cierra aunque salte una excepción a mitad
+    # (evita ficheros -wal/-shm huérfanos y locks).
     conn = sqlite3.connect(db_path)
-    cursor = conn.execute(
-        "SELECT placsp_id FROM contratos WHERE importe_adjudicacion_con_iva IS NULL"
-    )
-    null_ids = {row[0] for row in cursor}
-    print(f"  Contratos BD sin importe_con_iva: {len(null_ids):,}")
+    try:
+        cursor = conn.execute(
+            "SELECT placsp_id FROM contratos WHERE importe_adjudicacion_con_iva IS NULL"
+        )
+        null_ids = {row[0] for row in cursor}
+        print(f"  Contratos BD sin importe_con_iva: {len(null_ids):,}")
 
-    # Intersección
-    enrichable = df[df["id_num"].isin(null_ids)]
-    print(f"  Contratos enriquecibles: {len(enrichable):,}")
+        # Intersección
+        enrichable = df[df["id_num"].isin(null_ids)]
+        print(f"  Contratos enriquecibles: {len(enrichable):,}")
 
-    if len(enrichable) == 0:
-        print("No hay contratos para enriquecer.")
-        conn.close()
-        return
+        if len(enrichable) == 0:
+            print("No hay contratos para enriquecer.")
+            return
 
-    if dry_run:
-        print(f"[DRY-RUN] Se actualizarían {len(enrichable):,} contratos.")
+        if dry_run:
+            print(f"[DRY-RUN] Se actualizarían {len(enrichable):,} contratos.")
 
-        # Mostrar muestra
-        sample = enrichable.head(5)
-        for _, row in sample.iterrows():
-            print(f"  {row['id_num']}: importe_con_iva = {row['importe_adj_con_iva']:.2f}")
+            # Mostrar muestra
+            for _, row in enrichable.head(5).iterrows():
+                print(f"  {row['id_num']}: importe_con_iva = {row['importe_adj_con_iva']:.2f}")
 
-        conn.close()
-        return
+            return
 
-    # Actualizar en batches
-    print("Actualizando BD...")
-    batch_size = 1000
-    updated = 0
-    total = len(enrichable)
+        # Actualizar en batches con executemany. zip + .tolist() (tipos nativos, no numpy)
+        # es ~100x más rápido que iterrows()+execute fila a fila.
+        print("Actualizando BD...")
+        batch_size = 5000
+        total = len(enrichable)
+        updated = 0
 
-    for start in range(0, total, batch_size):
-        batch = enrichable.iloc[start : start + batch_size]
-        for _, row in batch.iterrows():
-            conn.execute(
-                "UPDATE contratos SET importe_adjudicacion_con_iva = ? WHERE placsp_id = ?",
-                (float(row["importe_adj_con_iva"]), row["id_num"]),
+        pares = list(
+            zip(
+                enrichable["importe_adj_con_iva"].astype(float).tolist(),
+                enrichable["id_num"].tolist(),
             )
-        conn.commit()
-        updated += len(batch)
-        if updated % 100000 == 0 or updated == total:
-            print(f"  {updated:,}/{total:,} actualizados ({100*updated/total:.1f}%)")
+        )
 
-    conn.close()
-    print(f"Completado: {updated:,} contratos enriquecidos con importe_adjudicacion_con_iva.")
+        for start in range(0, total, batch_size):
+            chunk = pares[start : start + batch_size]
+            conn.executemany(
+                "UPDATE contratos SET importe_adjudicacion_con_iva = ? WHERE placsp_id = ?",
+                chunk,
+            )
+            conn.commit()
+            updated += len(chunk)
+            if updated % 100000 == 0 or updated == total:
+                print(f"  {updated:,}/{total:,} actualizados ({100*updated/total:.1f}%)")
+
+        print(f"Completado: {updated:,} contratos enriquecidos con importe_adjudicacion_con_iva.")
+    finally:
+        conn.close()
 
 
 def main() -> None:

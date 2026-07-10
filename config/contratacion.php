@@ -194,7 +194,7 @@ return [
     */
     'admin' => [
         'email' => env('ADMIN_EMAIL', 'admin@contratacionabierta.com'),
-        'default_password' => env('ADMIN_PASSWORD', 'change-me-now'),
+        'default_password' => env('ADMIN_PASSWORD'), // sin fallback: null si no está definida (el seeder aborta)
         'allowed_ips' => array_filter(explode(',', env('ADMIN_ALLOWED_IPS', '127.0.0.1,::1'))),
         'commands' => [
             'stats:recalculate',

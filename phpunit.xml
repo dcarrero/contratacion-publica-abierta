@@ -18,14 +18,18 @@
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <!-- Clave fija SOLO para tests (no es secreto de producción): el CI no tiene .env,
+             así que sin esto los tests que tocan cifrado fallan con MissingAppKeyException. -->
+        <env name="APP_KEY" value="base64:0iG6CQf7EaTvsihQJvGIwF6LGIEuKiA6zFmR+KaSe7k=" force="true"/>
+        <env name="ADMIN_PASSWORD" value="testing-admin-password" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="DB_SQLITE_DATABASE" value=":memory:"/>
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <env name="DB_SQLITE_DATABASE" value=":memory:" force="true"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

@@ -356,7 +356,30 @@ class ContratoImporterTest extends TestCase
     {
         $counts = $this->importer->importBatch([]);
 
-        $this->assertEquals(['created' => 0, 'updated' => 0, 'skipped' => 0], $counts);
+        $this->assertEquals(['created' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => 0], $counts);
+    }
+
+    /**
+     * Resiliencia: si el INSERT masivo falla por una fila defectuosa (aquí, un placsp_id
+     * duplicado dentro del lote que viola la UNIQUE), importBatch aísla la mala fila a fila,
+     * conserva las buenas y las cuenta en 'errors' — sin abortar todo el lote.
+     */
+    public function test_import_batch_aisla_fila_defectuosa(): void
+    {
+        $counts = $this->importer->importBatch([
+            $this->makeData(['placsp_id' => 'BATCH-OK-A', 'objeto' => 'A']),
+            $this->makeData(['placsp_id' => 'BATCH-DUP', 'objeto' => 'Primera']),
+            $this->makeData(['placsp_id' => 'BATCH-DUP', 'objeto' => 'Duplicada']),  // rompe la UNIQUE
+            $this->makeData(['placsp_id' => 'BATCH-OK-B', 'objeto' => 'B']),
+        ]);
+
+        $this->assertEquals(3, $counts['created'], 'Se crean las 3 filas buenas (A, DUP, B).');
+        $this->assertEquals(1, $counts['errors'], 'La fila duplicada se aísla como error.');
+        $this->assertEquals(0, $counts['updated']);
+        $this->assertEquals(0, $counts['skipped']);
+
+        $this->assertEquals(1, Contrato::where('placsp_id', 'BATCH-DUP')->count());
+        $this->assertEquals(3, Contrato::whereIn('placsp_id', ['BATCH-OK-A', 'BATCH-DUP', 'BATCH-OK-B'])->count());
     }
 
     /**

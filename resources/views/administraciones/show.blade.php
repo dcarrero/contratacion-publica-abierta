@@ -63,11 +63,12 @@
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Principales organismos de {{ $comunidad->nombre }}</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-2 text-left">Nombre</th>
-                            <th class="px-4 py-2 text-right">Contratos</th>
-                            <th class="px-4 py-2 text-right">Importe</th>
+                            <th scope="col" class="px-4 py-2 text-left">Nombre</th>
+                            <th scope="col" class="px-4 py-2 text-right">Contratos</th>
+                            <th scope="col" class="px-4 py-2 text-right">Importe</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -99,11 +100,12 @@
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Últimos contratos de {{ $comunidad->nombre }}</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-2 text-left">Fecha</th>
-                            <th class="px-4 py-2 text-left">Objeto</th>
-                            <th class="px-4 py-2 text-right">Importe</th>
+                            <th scope="col" class="px-4 py-2 text-left">Fecha</th>
+                            <th scope="col" class="px-4 py-2 text-left">Objeto</th>
+                            <th scope="col" class="px-4 py-2 text-right">Importe</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">

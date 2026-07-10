@@ -11,7 +11,7 @@
             <label for="busqueda" class="sr-only">Buscar</label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
@@ -20,7 +20,7 @@
                     type="text"
                     id="busqueda"
                     placeholder="Buscar por objeto, expediente o ID PLACSP..."
-                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder-gray-400 focus:ring-primary focus:border-primary"
+                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:ring-primary focus:border-primary"
                 >
             </div>
         </div>
@@ -154,11 +154,11 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         {{-- Contador + loading --}}
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-gray-500" role="status" aria-live="polite">
                 {{ number_format($contratos->total(), 0, ',', '.') }} contratos encontrados
             </p>
             <div wire:loading class="text-sm text-primary font-medium flex items-center gap-1">
-                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
@@ -169,14 +169,15 @@
         {{-- Tabla --}}
         <div class="overflow-x-auto" wire:loading.class="opacity-50">
             <table class="min-w-full text-sm">
+                <caption class="sr-only">Contratos públicos que coinciden con los filtros aplicados</caption>
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                     <tr>
-                        <th class="px-4 py-3 text-left">Fecha</th>
-                        <th class="px-4 py-3 text-left">Objeto</th>
-                        <th class="px-4 py-3 text-left hidden lg:table-cell">Organismo</th>
-                        <th class="px-4 py-3 text-left hidden md:table-cell">Tipo</th>
-                        <th class="px-4 py-3 text-right">Importe</th>
-                        <th class="px-4 py-3 text-center hidden sm:table-cell">Estado</th>
+                        <th scope="col" class="px-4 py-3 text-left">Fecha</th>
+                        <th scope="col" class="px-4 py-3 text-left">Objeto</th>
+                        <th scope="col" class="px-4 py-3 text-left hidden lg:table-cell">Organismo</th>
+                        <th scope="col" class="px-4 py-3 text-left hidden md:table-cell">Tipo</th>
+                        <th scope="col" class="px-4 py-3 text-right">Importe</th>
+                        <th scope="col" class="px-4 py-3 text-center hidden sm:table-cell">Estado</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -192,7 +193,7 @@
                             @if($contrato->es_menor)
                                 <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">Menor</span>
                             @endif
-                            <div class="text-xs text-gray-400 mt-0.5 lg:hidden">
+                            <div class="text-xs text-gray-500 mt-0.5 lg:hidden">
                                 {{ Str::limit($contrato->organismo?->nombre, 50) }}
                             </div>
                         </td>
@@ -223,8 +224,8 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-12 text-center text-gray-400">
-                            <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <td colspan="6" class="px-4 py-12 text-center text-gray-500">
+                            <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                             <p class="text-sm">No se encontraron contratos con los filtros aplicados.</p>

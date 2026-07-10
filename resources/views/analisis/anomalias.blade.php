@@ -46,14 +46,15 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
+                <caption class="sr-only">Anomalías detectadas en la contratación pública</caption>
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                     <tr>
-                        <th class="px-4 py-3 text-left">Tipo</th>
-                        <th class="px-4 py-3 text-left">Severidad</th>
-                        <th class="px-4 py-3 text-left">Organismo</th>
-                        <th class="px-4 py-3 text-left">Descripción</th>
-                        <th class="px-4 py-3 text-left">Periodo</th>
-                        <th class="px-4 py-3 text-left">Fecha</th>
+                        <th scope="col" class="px-4 py-3 text-left">Tipo</th>
+                        <th scope="col" class="px-4 py-3 text-left">Severidad</th>
+                        <th scope="col" class="px-4 py-3 text-left">Organismo</th>
+                        <th scope="col" class="px-4 py-3 text-left">Descripción</th>
+                        <th scope="col" class="px-4 py-3 text-left">Periodo</th>
+                        <th scope="col" class="px-4 py-3 text-left">Fecha</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -97,7 +98,7 @@
                                     {{ Str::limit($anomalia->organismo->nombre, 40) }}
                                 </a>
                             @else
-                                <span class="text-gray-400">—</span>
+                                <span class="text-gray-500">—</span>
                             @endif
                         </td>
                         <td class="px-4 py-3 text-gray-600 text-xs max-w-md">
@@ -118,7 +119,7 @@
         </div>
     </div>
 
-    <div class="mt-6 text-xs text-gray-400">
+    <div class="mt-6 text-xs text-gray-500">
         <p>Las anomalías se detectan automáticamente cada lunes. Los resultados son indicativos y requieren verificación humana.</p>
     </div>
 

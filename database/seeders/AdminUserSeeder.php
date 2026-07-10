@@ -12,11 +12,20 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
+        $password = config('contratacion.admin.default_password');
+
+        if (blank($password)) {
+            throw new \RuntimeException(
+                'ADMIN_PASSWORD no está definido; abortando el seed del usuario admin. '
+                .'Define una contraseña fuerte en el entorno antes de sembrar.'
+            );
+        }
+
         User::firstOrCreate(
             ['email' => config('contratacion.admin.email')],
             [
                 'name' => 'Admin',
-                'password' => Hash::make(config('contratacion.admin.default_password')),
+                'password' => Hash::make($password),
             ]
         );
     }

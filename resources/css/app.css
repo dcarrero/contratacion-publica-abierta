@@ -13,3 +13,11 @@
     --color-neutral: #4A4A4A;
     --color-neutral-light: #F5F5F5;
 }
+
+/* Foco visible global (WCAG 2.4.7 / 2.4.11): garantiza indicador de foco en
+   todos los controles interactivos, incluidos los que usan outline-none. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}

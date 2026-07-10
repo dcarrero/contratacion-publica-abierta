@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\Nuts;
 use App\Support\SqlDialect;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -131,7 +132,12 @@ class Contrato extends Model
 
     public function scopeYear(Builder $query, int $year): Builder
     {
-        return $query->whereYear('fecha_publicacion', $year);
+        // Rango sargable en vez de whereYear() (que envuelve la columna en EXTRACT y no
+        // usa el índice → full scan de los 8M). Equivalente: excluye NULLs igual que antes.
+        $col = $query->qualifyColumn('fecha_publicacion');
+
+        return $query->where($col, '>=', sprintf('%04d-01-01', $year))
+            ->where($col, '<', sprintf('%04d-01-01', $year + 1));
     }
 
     public function scopeTipo(Builder $query, string $tipo): Builder
@@ -175,6 +181,13 @@ class Contrato extends Model
 
     public function scopeCcaa(Builder $query, string $nuts2): Builder
     {
-        return $query->where('nuts', 'LIKE', "{$nuts2}%");
+        // Rango sargable en vez de LIKE 'prefijo%' parametrizado (que no usa el índice
+        // btree). Equivalente para coincidencia por prefijo. Sirve también para provincias
+        // (prefijos NUTS más largos). qualifyColumn evita ambigüedad de 'nuts' en JOINs
+        // (organismos también tiene columna nuts).
+        [$low, $high] = Nuts::bounds($nuts2);
+        $col = $query->qualifyColumn('nuts');
+
+        return $query->where($col, '>=', $low)->where($col, '<', $high);
     }
 }

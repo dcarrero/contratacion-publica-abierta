@@ -27,8 +27,10 @@
 
 <div id="mapa-container" x-data="mapaApp()">
 
+    <h1 class="sr-only">Mapa de la contratación pública en España por comunidad autónoma</h1>
+
     {{-- Mapa --}}
-    <div id="mapa"></div>
+    <div id="mapa" role="img" aria-label="Mapa coroplético del importe adjudicado por comunidad autónoma. Los mismos datos están disponibles en el ranking del panel lateral."></div>
 
     {{-- Sidebar --}}
     <div class="bg-white border-l border-gray-200 overflow-y-auto p-4 flex flex-col gap-4">

@@ -65,11 +65,11 @@ class ContratoImporter
      * update/versionado individual (preservando hash_contenido y historial).
      *
      * @param  array<int, array<string, mixed>>  $filas
-     * @return array{created: int, updated: int, skipped: int}
+     * @return array{created: int, updated: int, skipped: int, errors: int}
      */
     public function importBatch(array $filas): array
     {
-        $counts = ['created' => 0, 'updated' => 0, 'skipped' => 0];
+        $counts = ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => 0];
 
         if (empty($filas)) {
             return $counts;
@@ -134,11 +134,37 @@ class ContratoImporter
             }
         }
 
-        // Step 4: batch-insert all new contracts
+        // Step 4: batch-insert all new contracts (insert() masivo en vez de create() fila a
+        // fila). Es seguro: Contrato no tiene eventos/observers de modelo y search_vector es
+        // una columna GENERATED que PostgreSQL rellena en el INSERT. insert() no dispara
+        // timestamps, así que created_at/updated_at se añaden a mano. hash_contenido ya viene
+        // en cada fila, por lo que la idempotencia posterior (skip por hash) se mantiene.
+        //
+        // Resiliencia: si el INSERT masivo de un chunk falla (una fila con constraint/dato
+        // inválido), se reintenta fila a fila para aislar la mala sin perder las buenas ni
+        // abortar todo el lote. Así el enrutado de los comandos a importBatch conserva la
+        // misma tolerancia a filas defectuosas que el import() fila a fila.
         if (! empty($toInsert)) {
-            foreach ($toInsert as $row) {
-                Contrato::create($row);
-                $counts['created']++;
+            $now = Carbon::now();
+            foreach (array_chunk($toInsert, 500) as $chunk) {
+                $rows = array_map(
+                    static fn (array $row): array => $row + ['created_at' => $now, 'updated_at' => $now],
+                    $chunk
+                );
+
+                try {
+                    Contrato::insert($rows);
+                    $counts['created'] += count($rows);
+                } catch (\Throwable $e) {
+                    foreach ($rows as $row) {
+                        try {
+                            Contrato::insert([$row]);
+                            $counts['created']++;
+                        } catch (\Throwable $rowError) {
+                            $counts['errors']++;
+                        }
+                    }
+                }
             }
         }
 

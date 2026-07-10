@@ -78,7 +78,7 @@
         <div class="bg-white rounded-lg shadow p-5">
             <p class="text-xs text-gray-500 uppercase tracking-wide">% adjudicaciones sin concurrencia</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ $ficha['kpis']['pct_sin_concurrencia'] }}%</p>
-            <p class="text-xs text-gray-400 mt-1">
+            <p class="text-xs text-gray-500 mt-1">
                 Una sola oferta, sobre {{ number_format($ficha['kpis']['contratos_con_num_ofertas'], 0, ',', '.') }}
                 contratos que declaran número de ofertas.
             </p>
@@ -89,9 +89,9 @@
             <p class="text-xs text-gray-500 uppercase tracking-wide">Concentración de proveedores</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">
                 {{ $ficha['kpis']['concentracion_label'] }}
-                <span class="text-base font-normal text-gray-400">(HHI {{ number_format($ficha['kpis']['concentracion_hhi'], 0, ',', '.') }})</span>
+                <span class="text-base font-normal text-gray-500">(HHI {{ number_format($ficha['kpis']['concentracion_hhi'], 0, ',', '.') }})</span>
             </p>
-            <p class="text-xs text-gray-400 mt-1">
+            <p class="text-xs text-gray-500 mt-1">
                 Índice Herfindahl por importe (0–10.000). Más alto = mayor dependencia de pocos adjudicatarios.
             </p>
         </div>
@@ -106,25 +106,26 @@
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Top 10 adjudicatarios de {{ $organismo->nombre }}</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">#</th>
-                                <th class="px-4 py-3 text-left">Nombre</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe</th>
+                                <th scope="col" class="px-4 py-3 text-left">#</th>
+                                <th scope="col" class="px-4 py-3 text-left">Nombre</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @foreach($ficha['top_adjudicatarios'] as $i => $item)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-gray-400 text-xs">{{ $i + 1 }}</td>
+                                <td class="px-4 py-3 text-gray-500 text-xs">{{ $i + 1 }}</td>
                                 <td class="px-4 py-3">
                                     @if($item->adjudicatario)
                                         <a href="{{ route('empresas.show', $item->adjudicatario->nif) }}" class="text-gray-900 hover:text-primary hover:underline">
                                             {{ Str::limit($item->adjudicatario->nombre, 50) }}
                                         </a>
                                     @else
-                                        <span class="text-gray-400">—</span>
+                                        <span class="text-gray-500">—</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">{{ number_format($item->num_contratos, 0, ',', '.') }}</td>
@@ -147,11 +148,12 @@
                 @endif
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Distribución por tipo de contrato</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">Tipo</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe</th>
+                                <th scope="col" class="px-4 py-3 text-left">Tipo</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -182,11 +184,12 @@
             <div class="mt-4 border-t pt-4">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Evolución anual de contratos e importe</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">Año</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe total</th>
+                                <th scope="col" class="px-4 py-3 text-left">Año</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -212,12 +215,13 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Últimos contratos de {{ $organismo->nombre }}</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">Fecha</th>
-                            <th class="px-4 py-3 text-left">Objeto</th>
-                            <th class="px-4 py-3 text-left hidden md:table-cell">Adjudicatario</th>
-                            <th class="px-4 py-3 text-right">Importe</th>
+                            <th scope="col" class="px-4 py-3 text-left">Fecha</th>
+                            <th scope="col" class="px-4 py-3 text-left">Objeto</th>
+                            <th scope="col" class="px-4 py-3 text-left hidden md:table-cell">Adjudicatario</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">

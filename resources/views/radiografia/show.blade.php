@@ -62,7 +62,7 @@
                     {{ $m['delta_pct'] >= 0 ? '▲' : '▼' }} {{ number_format(abs($m['delta_pct']), 1, ',', '.') }}% vs {{ $cmp['year_anterior'] }}
                 </div>
                 @else
-                <div class="text-xs mt-1 text-gray-400">sin dato {{ $cmp['year_anterior'] }}</div>
+                <div class="text-xs mt-1 text-gray-500">sin dato {{ $cmp['year_anterior'] }}</div>
                 @endif
             </div>
             @endforeach
@@ -72,7 +72,7 @@
                     {{ $cmp['per_capita']['actual'] !== null ? formatImporte($cmp['per_capita']['actual']) : '—' }}
                 </div>
                 @if($cmp['per_capita']['anterior'] !== null)
-                <div class="text-xs mt-1 text-gray-400">{{ formatImporte($cmp['per_capita']['anterior']) }} en {{ $cmp['year_anterior'] }}</div>
+                <div class="text-xs mt-1 text-gray-500">{{ formatImporte($cmp['per_capita']['anterior']) }} en {{ $cmp['year_anterior'] }}</div>
                 @endif
             </div>
         </div>
@@ -124,11 +124,12 @@
         </div>
         <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
             <table class="w-full text-sm">
+                <caption class="sr-only">Evolución anual de la contratación en {{ $provincia->nombre }}</caption>
                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
                     <tr>
-                        <th class="text-left px-4 py-2">Año</th>
-                        <th class="text-right px-4 py-2">Contratos</th>
-                        <th class="text-right px-4 py-2">Importe</th>
+                        <th scope="col" class="text-left px-4 py-2">Año</th>
+                        <th scope="col" class="text-right px-4 py-2">Contratos</th>
+                        <th scope="col" class="text-right px-4 py-2">Importe</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -149,18 +150,19 @@
         <h2 class="text-lg font-semibold text-gray-900 mb-3">Principales adjudicatarios</h2>
         <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
             <table class="w-full text-sm">
+                <caption class="sr-only">Principales adjudicatarios en {{ $provincia->nombre }}</caption>
                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
                     <tr>
-                        <th class="text-left px-4 py-2">#</th>
-                        <th class="text-left px-4 py-2">Empresa</th>
-                        <th class="text-right px-4 py-2">Contratos</th>
-                        <th class="text-right px-4 py-2">Importe</th>
+                        <th scope="col" class="text-left px-4 py-2">#</th>
+                        <th scope="col" class="text-left px-4 py-2">Empresa</th>
+                        <th scope="col" class="text-right px-4 py-2">Contratos</th>
+                        <th scope="col" class="text-right px-4 py-2">Importe</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @foreach(array_slice($data['top_adjudicatarios'], 0, 15) as $i => $row)
                     <tr>
-                        <td class="px-4 py-2 text-gray-400">{{ $i + 1 }}</td>
+                        <td class="px-4 py-2 text-gray-500">{{ $i + 1 }}</td>
                         <td class="px-4 py-2">
                             <a href="{{ route('empresas.show', $row['nif']) }}" class="text-primary hover:underline">{{ $row['nombre'] }}</a>
                         </td>
@@ -178,18 +180,19 @@
         <h2 class="text-lg font-semibold text-gray-900 mb-3">Principales organismos contratantes</h2>
         <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
             <table class="w-full text-sm">
+                <caption class="sr-only">Principales organismos contratantes en {{ $provincia->nombre }}</caption>
                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
                     <tr>
-                        <th class="text-left px-4 py-2">#</th>
-                        <th class="text-left px-4 py-2">Organismo</th>
-                        <th class="text-right px-4 py-2">Contratos</th>
-                        <th class="text-right px-4 py-2">Importe</th>
+                        <th scope="col" class="text-left px-4 py-2">#</th>
+                        <th scope="col" class="text-left px-4 py-2">Organismo</th>
+                        <th scope="col" class="text-right px-4 py-2">Contratos</th>
+                        <th scope="col" class="text-right px-4 py-2">Importe</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @foreach(array_slice($data['top_organismos'], 0, 15) as $i => $row)
                     <tr>
-                        <td class="px-4 py-2 text-gray-400">{{ $i + 1 }}</td>
+                        <td class="px-4 py-2 text-gray-500">{{ $i + 1 }}</td>
                         <td class="px-4 py-2">
                             <a href="{{ route('organismos.show', $row['nif']) }}" class="text-primary hover:underline">{{ $row['nombre'] }}</a>
                         </td>
@@ -203,7 +206,7 @@
         @endif
 
         {{-- Fuente / disclaimer --}}
-        <p class="text-xs text-gray-400 mt-8">
+        <p class="text-xs text-gray-500 mt-8">
             Solo se incluyen los contratos con código territorial (NUTS) a nivel provincial. Datos de fuentes
             oficiales (PLACSP y portales de datos abiertos); pueden contener errores o no estar completamente
             actualizados. Consulte siempre las fuentes oficiales. No es un sitio web oficial.

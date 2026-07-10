@@ -19,20 +19,21 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Organismos con mayor porcentaje de contratos menores</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">#</th>
-                            <th class="px-4 py-3 text-left">Organismo</th>
-                            <th class="px-4 py-3 text-right">Contratos</th>
-                            <th class="px-4 py-3 text-right">Menores</th>
-                            <th class="px-4 py-3 text-right">% Menores</th>
-                            <th class="px-4 py-3 text-right">Importe total</th>
+                            <th scope="col" class="px-4 py-3 text-left">#</th>
+                            <th scope="col" class="px-4 py-3 text-left">Organismo</th>
+                            <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                            <th scope="col" class="px-4 py-3 text-right">Menores</th>
+                            <th scope="col" class="px-4 py-3 text-right">% Menores</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe total</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($rankings['top_organismos_pct_menores'] as $i => $org)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
                             <td class="px-4 py-3 font-medium text-gray-900">
                                 <a href="{{ route('organismos.show', $org['nif']) }}" class="hover:text-primary hover:underline">{{ Str::limit($org['nombre'], 55) }}</a>
                             </td>
@@ -69,16 +70,17 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Comparativa de indicadores por comunidad autónoma</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">CCAA</th>
-                            <th class="px-4 py-3 text-right">Contratos</th>
-                            <th class="px-4 py-3 text-right">Importe total</th>
-                            <th class="px-4 py-3 text-right">Imp. medio</th>
-                            <th class="px-4 py-3 text-right">% Menores</th>
-                            <th class="px-4 py-3 text-right">Per cápita</th>
-                            <th class="px-4 py-3 text-right">Media ofertas</th>
-                            <th class="px-4 py-3 text-right">YoY</th>
+                            <th scope="col" class="px-4 py-3 text-left">CCAA</th>
+                            <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe total</th>
+                            <th scope="col" class="px-4 py-3 text-right">Imp. medio</th>
+                            <th scope="col" class="px-4 py-3 text-right">% Menores</th>
+                            <th scope="col" class="px-4 py-3 text-right">Per cápita</th>
+                            <th scope="col" class="px-4 py-3 text-right">Media ofertas</th>
+                            <th scope="col" class="px-4 py-3 text-right">YoY</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -102,7 +104,7 @@
                                 @if(!empty($ccaa['gasto_per_capita']))
                                     {{ formatImporteCorto($ccaa['gasto_per_capita']) }}/hab
                                 @else
-                                    <span class="text-gray-400">—</span>
+                                    <span class="text-gray-500">—</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-right">
@@ -114,7 +116,7 @@
                                         {{ $ccaa['crecimiento_yoy'] >= 0 ? '+' : '' }}{{ number_format($ccaa['crecimiento_yoy'], 1, ',', '.') }}%
                                     </span>
                                 @else
-                                    <span class="text-gray-400">—</span>
+                                    <span class="text-gray-500">—</span>
                                 @endif
                             </td>
                         </tr>
@@ -137,19 +139,20 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Organismos con mayor importe medio por contrato</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">#</th>
-                            <th class="px-4 py-3 text-left">Organismo</th>
-                            <th class="px-4 py-3 text-right">Contratos</th>
-                            <th class="px-4 py-3 text-right">Importe total</th>
-                            <th class="px-4 py-3 text-right">Importe medio</th>
+                            <th scope="col" class="px-4 py-3 text-left">#</th>
+                            <th scope="col" class="px-4 py-3 text-left">Organismo</th>
+                            <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe total</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe medio</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($rankings['top_organismos_importe_medio'] as $i => $org)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
                             <td class="px-4 py-3 font-medium text-gray-900">
                                 <a href="{{ route('organismos.show', $org['nif']) }}" class="hover:text-primary hover:underline">{{ Str::limit($org['nombre'], 55) }}</a>
                             </td>
@@ -172,19 +175,20 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Organismos con más anomalías detectadas</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">#</th>
-                            <th class="px-4 py-3 text-left">Organismo</th>
-                            <th class="px-4 py-3 text-right">Total anomalías</th>
-                            <th class="px-4 py-3 text-right">Severidad alta</th>
-                            <th class="px-4 py-3 text-right">Severidad media</th>
+                            <th scope="col" class="px-4 py-3 text-left">#</th>
+                            <th scope="col" class="px-4 py-3 text-left">Organismo</th>
+                            <th scope="col" class="px-4 py-3 text-right">Total anomalías</th>
+                            <th scope="col" class="px-4 py-3 text-right">Severidad alta</th>
+                            <th scope="col" class="px-4 py-3 text-right">Severidad media</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($rankings['top_organismos_anomalias'] as $i => $org)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
                             <td class="px-4 py-3 font-medium text-gray-900">
                                 <a href="{{ route('organismos.show', $org['nif']) }}" class="hover:text-primary hover:underline">{{ Str::limit($org['nombre'], 55) }}</a>
                             </td>
@@ -195,7 +199,7 @@
                                         {{ $org['anomalias_alta'] }}
                                     </span>
                                 @else
-                                    <span class="text-gray-400">0</span>
+                                    <span class="text-gray-500">0</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-right">
@@ -204,7 +208,7 @@
                                         {{ $org['anomalias_media'] }}
                                     </span>
                                 @else
-                                    <span class="text-gray-400">0</span>
+                                    <span class="text-gray-500">0</span>
                                 @endif
                             </td>
                         </tr>
@@ -216,7 +220,7 @@
     </section>
     @endif
 
-    <p class="text-xs text-gray-400 text-center">
+    <p class="text-xs text-gray-500 text-center">
         Datos generados el {{ \Carbon\Carbon::parse($rankings['generado_at'])->format('d/m/Y H:i') }}.
         Fuente: <a href="https://contrataciondelestado.es" target="_blank" rel="noopener" class="underline hover:text-gray-600">PLACSP</a> y portales autonómicos.
     </p>

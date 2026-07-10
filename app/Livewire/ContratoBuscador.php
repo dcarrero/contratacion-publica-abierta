@@ -154,7 +154,8 @@ class ContratoBuscador extends Component
         }
 
         if ($this->provincia !== '') {
-            $query->where('nuts', 'LIKE', "{$this->provincia}%");
+            // scopeCcaa acepta cualquier prefijo NUTS (provincia = prefijo más largo) y es sargable.
+            $query->ccaa($this->provincia);
         } elseif ($this->ccaa !== '') {
             $query->ccaa($this->ccaa);
         }

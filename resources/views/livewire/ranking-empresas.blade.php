@@ -11,7 +11,7 @@
                 <label for="busqueda" class="sr-only">Buscar</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
@@ -20,7 +20,7 @@
                         type="text"
                         id="busqueda"
                         placeholder="Buscar por nombre o NIF..."
-                        class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder-gray-400 focus:ring-primary focus:border-primary"
+                        class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:ring-primary focus:border-primary"
                     >
                 </div>
             </div>
@@ -59,9 +59,9 @@
     {{-- Tabla --}}
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <p class="text-sm text-gray-500">{{ number_format($empresas->total(), 0, ',', '.') }} empresas</p>
+            <p class="text-sm text-gray-500" role="status" aria-live="polite">{{ number_format($empresas->total(), 0, ',', '.') }} empresas</p>
             <div wire:loading class="text-sm text-primary font-medium flex items-center gap-1">
-                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
@@ -71,25 +71,26 @@
 
         <div class="overflow-x-auto" wire:loading.class="opacity-50">
             <table class="min-w-full text-sm">
+                <caption class="sr-only">Ranking de empresas adjudicatarias según los filtros aplicados</caption>
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                     <tr>
-                        <th class="px-4 py-3 text-left w-12">#</th>
-                        <th class="px-4 py-3 text-left">Nombre</th>
-                        <th class="px-4 py-3 text-left hidden sm:table-cell">NIF</th>
-                        <th class="px-4 py-3 text-center hidden md:table-cell">PYME</th>
-                        <th class="px-4 py-3 text-right">Contratos</th>
-                        <th class="px-4 py-3 text-right">Importe total</th>
+                        <th scope="col" class="px-4 py-3 text-left w-12">#</th>
+                        <th scope="col" class="px-4 py-3 text-left">Nombre</th>
+                        <th scope="col" class="px-4 py-3 text-left hidden sm:table-cell">NIF</th>
+                        <th scope="col" class="px-4 py-3 text-center hidden md:table-cell">PYME</th>
+                        <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                        <th scope="col" class="px-4 py-3 text-right">Importe total</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($empresas as $i => $empresa)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-400 text-xs">{{ $empresas->firstItem() + $i }}</td>
+                        <td class="px-4 py-3 text-gray-500 text-xs">{{ $empresas->firstItem() + $i }}</td>
                         <td class="px-4 py-3">
                             <a href="{{ route('empresas.show', $empresa->nif) }}" class="font-medium text-gray-900 hover:text-primary hover:underline">
                                 {{ Str::limit($empresa->nombre, 60) }}
                             </a>
-                            <span class="sm:hidden block text-xs text-gray-400 font-mono mt-0.5">{{ $empresa->nif }}</span>
+                            <span class="sm:hidden block text-xs text-gray-500 font-mono mt-0.5">{{ $empresa->nif }}</span>
                         </td>
                         <td class="px-4 py-3 text-gray-500 font-mono text-xs hidden sm:table-cell">{{ $empresa->nif }}</td>
                         <td class="px-4 py-3 text-center hidden md:table-cell">
@@ -104,7 +105,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-12 text-center text-gray-400">
+                        <td colspan="6" class="px-4 py-12 text-center text-gray-500">
                             No se encontraron empresas.
                         </td>
                     </tr>

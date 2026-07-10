@@ -61,13 +61,17 @@ class ExportController extends Controller
                 'nuts', 'cpv', 'es_menor', 'num_ofertas', 'url_placsp',
             ]);
 
+            // JOIN + select en vez de with()->cursor(): en Laravel 12 cursor() ignora el
+            // eager loading, así que with() dispararía lazy load (2 queries por fila → N+1).
             $query = Contrato::query()
-                ->with(['organismo:id,nombre', 'adjudicatario:id,nombre']);
+                ->leftJoin('organismos as o', 'contratos.organismo_id', '=', 'o.id')
+                ->leftJoin('adjudicatarios as a', 'contratos.adjudicatario_id', '=', 'a.id')
+                ->select('contratos.*', 'o.nombre as org_nombre', 'a.nombre as adj_nombre');
 
             // Filtros
             $ccaa = $this->validCcaa($request->input('ccaa'));
             if ($ccaa) {
-                $query->where('nuts', 'LIKE', $ccaa.'%');
+                $query->ccaa($ccaa);
             }
             if ($request->filled('year')) {
                 $query->year((int) $request->input('year'));
@@ -107,9 +111,9 @@ class ExportController extends Controller
                     $contrato->fecha_adjudicacion?->format('Y-m-d'),
                     $contrato->fecha_formalizacion?->format('Y-m-d'),
                     $contrato->nif_organo,
-                    $contrato->organismo?->nombre,
+                    $contrato->getAttribute('org_nombre'),
                     $contrato->nif_adjudicatario,
-                    $contrato->adjudicatario?->nombre,
+                    $contrato->getAttribute('adj_nombre'),
                     $contrato->nuts,
                     $contrato->cpv,
                     $contrato->es_menor ? '1' : '0',

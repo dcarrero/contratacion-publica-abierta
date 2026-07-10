@@ -100,6 +100,10 @@ def safe_date(val):
 
 
 def bulk_import(csv_path: str, db_path: str, batch_size: int = 5000) -> None:
+    # El límite por defecto de csv (131072 bytes/campo) puede quedarse corto para objetos
+    # de contrato largos y abortar toda la importación con _csv.Error a mitad de fichero.
+    csv.field_size_limit(sys.maxsize)
+
     csv_file = Path(csv_path)
     if not csv_file.exists():
         print(f"Error: {csv_file} no encontrado")

@@ -19,8 +19,9 @@ from pathlib import Path
 
 try:
     import pandas as pd
+    import pyarrow.parquet as pq
 except ImportError:
-    print("Error: pandas no instalado. Ejecuta: pip install pandas pyarrow")
+    print("Error: pandas/pyarrow no instalado. Ejecuta: pip install pandas pyarrow")
     sys.exit(1)
 
 
@@ -91,7 +92,13 @@ def export_nuevos(input_path: str, output_path: str, db_path: str) -> None:
         sys.exit(1)
 
     print(f"Leyendo {input_file}...")
-    df = pd.read_parquet(input_file)
+    # Column pushdown: leer solo las columnas necesarias (nombres de ORIGEN) que existan en
+    # el Parquet, en vez de materializar las 48 columnas. Reduce memoria e I/O a escala.
+    inverse_rename = {v: k for k, v in COLUMNS_RENAME.items()}
+    source_cols = list(dict.fromkeys(inverse_rename.get(c, c) for c in OUTPUT_COLUMNS))
+    schema_names = set(pq.ParquetFile(input_file).schema.names)
+    cols_to_read = [c for c in source_cols if c in schema_names]
+    df = pd.read_parquet(input_file, columns=cols_to_read)
     print(f"  Total registros BQuant: {len(df):,}")
 
     # Renombrar columnas

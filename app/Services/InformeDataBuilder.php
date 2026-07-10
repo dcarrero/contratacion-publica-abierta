@@ -566,10 +566,6 @@ class InformeDataBuilder
      */
     private function nutsBounds(string $nutsLike): array
     {
-        $low = rtrim($nutsLike, '%');
-        $last = substr($low, -1);
-        $high = substr($low, 0, -1).chr(ord($last) + 1);
-
-        return [$low, $high];
+        return \App\Support\Nuts::bounds($nutsLike);
     }
 }

@@ -31,7 +31,7 @@
         'name' => config('contratacion.sitio.nombre', 'Contratación Abierta'),
         'url' => config('contratacion.sitio.url', url('/')),
         'description' => 'Portal de transparencia en contratación pública de España.',
-    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -39,6 +39,12 @@
     @stack('styles')
 </head>
 <body class="min-h-screen flex flex-col bg-gray-50 text-gray-800 antialiased">
+
+    {{-- Skip link (WCAG 2.4.1): primer elemento tabulable, salta la navegación --}}
+    <a href="#contenido"
+       class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded focus:shadow">
+        Saltar al contenido
+    </a>
 
     {{-- Header --}}
     <header class="bg-primary text-white shadow-md">
@@ -52,7 +58,7 @@
                 </div>
 
                 {{-- Nav desktop --}}
-                <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+                <nav aria-label="Principal" class="hidden md:flex items-center gap-6 text-sm font-medium">
                     <a href="{{ route('dashboard') }}" class="hover:text-red-200 transition {{ request()->routeIs('dashboard') ? 'text-white underline underline-offset-4' : 'text-red-100' }}">
                         Inicio
                     </a>
@@ -84,12 +90,15 @@
 
                 {{-- Hamburger mobile --}}
                 <button
-                    x-data
-                    x-on:click="$dispatch('toggle-mobile-nav')"
+                    x-data="{ open: false }"
+                    x-on:click="open = !open; $dispatch('toggle-mobile-nav')"
+                    type="button"
                     class="md:hidden p-2 rounded hover:bg-primary-dark transition"
                     aria-label="Menú"
+                    aria-controls="mobile-nav"
+                    x-bind:aria-expanded="open ? 'true' : 'false'"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
@@ -98,8 +107,11 @@
 
         {{-- Nav mobile --}}
         <nav
+            id="mobile-nav"
+            aria-label="Menú móvil"
             x-data="{ open: false }"
             x-on:toggle-mobile-nav.window="open = !open"
+            x-on:keydown.escape.window="open = false"
             x-show="open"
             x-transition
             class="md:hidden border-t border-red-400"
@@ -119,7 +131,7 @@
     </header>
 
     {{-- Content --}}
-    <main class="flex-1 {{ ($fullWidth ?? false) ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8' }} w-full">
+    <main id="contenido" class="flex-1 {{ ($fullWidth ?? false) ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8' }} w-full">
         {{ $slot }}
     </main>
 

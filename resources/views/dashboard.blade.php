@@ -1,5 +1,7 @@
 <x-layouts.app title="Contratación Abierta — Dashboard">
 
+    <h1 class="sr-only">Contratación pública en España: panel de indicadores</h1>
+
     {{-- KPI Cards --}}
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <div class="bg-white rounded-lg shadow p-6">
@@ -52,13 +54,14 @@
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Top 10 adjudicatarios por importe</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">#</th>
-                                <th class="px-4 py-3 text-left">Nombre</th>
-                                <th class="px-4 py-3 text-left">NIF</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe</th>
+                                <th scope="col" class="px-4 py-3 text-left">#</th>
+                                <th scope="col" class="px-4 py-3 text-left">Nombre</th>
+                                <th scope="col" class="px-4 py-3 text-left">NIF</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -85,13 +88,14 @@
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Top 10 organismos por importe</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">#</th>
-                                <th class="px-4 py-3 text-left">Nombre</th>
-                                <th class="px-4 py-3 text-left">NIF</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe</th>
+                                <th scope="col" class="px-4 py-3 text-left">#</th>
+                                <th scope="col" class="px-4 py-3 text-left">Nombre</th>
+                                <th scope="col" class="px-4 py-3 text-left">NIF</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -119,13 +123,14 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Últimos 20 contratos publicados</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">Fecha</th>
-                            <th class="px-4 py-3 text-left">Objeto</th>
-                            <th class="px-4 py-3 text-left">Organismo</th>
-                            <th class="px-4 py-3 text-right">Importe</th>
-                            <th class="px-4 py-3 text-center">PLACSP</th>
+                            <th scope="col" class="px-4 py-3 text-left">Fecha</th>
+                            <th scope="col" class="px-4 py-3 text-left">Objeto</th>
+                            <th scope="col" class="px-4 py-3 text-left">Organismo</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe</th>
+                            <th scope="col" class="px-4 py-3 text-center">PLACSP</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">

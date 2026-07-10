@@ -29,7 +29,7 @@
             @if(Route::has('empresas.informe.pdf'))
             <a href="{{ route('empresas.informe.pdf', $empresa->nif) }}"
                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-red-50 text-primary hover:bg-red-100 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Descargar informe PDF
             </a>
             @endif
@@ -91,25 +91,26 @@
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Top 10 organismos contratantes de {{ $empresa->nombre }}</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">#</th>
-                                <th class="px-4 py-3 text-left">Nombre</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe</th>
+                                <th scope="col" class="px-4 py-3 text-left">#</th>
+                                <th scope="col" class="px-4 py-3 text-left">Nombre</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @foreach($ficha['top_organismos'] as $i => $item)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-gray-400 text-xs">{{ $i + 1 }}</td>
+                                <td class="px-4 py-3 text-gray-500 text-xs">{{ $i + 1 }}</td>
                                 <td class="px-4 py-3">
                                     @if($item->organismo)
                                         <a href="{{ route('organismos.show', $item->organismo->nif) }}" class="text-gray-900 hover:text-primary hover:underline">
                                             {{ Str::limit($item->organismo->nombre, 50) }}
                                         </a>
                                     @else
-                                        <span class="text-gray-400">—</span>
+                                        <span class="text-gray-500">—</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">{{ number_format($item->num_contratos, 0, ',', '.') }}</td>
@@ -132,11 +133,12 @@
                 @endif
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Distribución por tipo de contrato</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">Tipo</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe</th>
+                                <th scope="col" class="px-4 py-3 text-left">Tipo</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -167,11 +169,12 @@
             <div class="mt-4 border-t pt-4">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
+                        <caption class="sr-only">Evolución anual de contratos e importe</caption>
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3 text-left">Año</th>
-                                <th class="px-4 py-3 text-right">Contratos</th>
-                                <th class="px-4 py-3 text-right">Importe total</th>
+                                <th scope="col" class="px-4 py-3 text-left">Año</th>
+                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
+                                <th scope="col" class="px-4 py-3 text-right">Importe total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -197,12 +200,13 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
+                    <caption class="sr-only">Contratos de {{ $empresa->nombre }}</caption>
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3 text-left">Fecha</th>
-                            <th class="px-4 py-3 text-left">Objeto</th>
-                            <th class="px-4 py-3 text-left hidden md:table-cell">Organismo</th>
-                            <th class="px-4 py-3 text-right">Importe</th>
+                            <th scope="col" class="px-4 py-3 text-left">Fecha</th>
+                            <th scope="col" class="px-4 py-3 text-left">Objeto</th>
+                            <th scope="col" class="px-4 py-3 text-left hidden md:table-cell">Organismo</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
