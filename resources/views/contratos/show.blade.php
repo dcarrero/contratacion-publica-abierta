@@ -25,7 +25,7 @@
 
             {{-- Header --}}
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">{{ $contrato->objeto }}</h1>
+                <h1 class="font-serif text-2xl sm:text-3xl font-semibold text-gray-900 leading-snug tracking-tight">{{ $contrato->objeto }}</h1>
                 <div class="mt-3 flex flex-wrap gap-2">
                     @if($contrato->estado)
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold

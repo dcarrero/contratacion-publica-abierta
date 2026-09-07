@@ -31,8 +31,22 @@ RUN mkdir -p /etc/ssl/private && \
       -subj "/CN=localhost" \
       -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 
-# PHP config: más memoria para comandos de sync
-RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini
+# PHP config: más memoria para comandos de sync + opcache/JIT también en CLI
+RUN { \
+      echo "memory_limit=1024M"; \
+      echo "max_execution_time=0"; \
+    } > /usr/local/etc/php/conf.d/memory.ini \
+ && { \
+      echo "opcache.enable=1"; \
+      echo "opcache.enable_cli=1"; \
+      echo "opcache.memory_consumption=256"; \
+      echo "opcache.interned_strings_buffer=32"; \
+      echo "opcache.max_accelerated_files=20000"; \
+      echo "opcache.validate_timestamps=1"; \
+      echo "opcache.revalidate_freq=2"; \
+      echo "opcache.jit=tracing"; \
+      echo "opcache.jit_buffer_size=64M"; \
+    } > /usr/local/etc/php/conf.d/opcache.ini
 
 # Caddyfile
 COPY Caddyfile /etc/frankenphp/Caddyfile

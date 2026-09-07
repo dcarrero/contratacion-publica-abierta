@@ -22,7 +22,7 @@
                 </div>
             @endif
 
-            <h1 class="text-xl font-bold text-gray-900 mb-2">{{ $titulo }}</h1>
+            <h1 class="font-serif text-2xl sm:text-3xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">{{ $titulo }}</h1>
             <p class="text-gray-600">{{ $mensaje }}</p>
 
             <div class="mt-8">

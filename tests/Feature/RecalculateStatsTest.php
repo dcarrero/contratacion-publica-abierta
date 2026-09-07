@@ -8,7 +8,10 @@ use App\Models\Adjudicatario;
 use App\Models\Contrato;
 use App\Models\FuenteDatos;
 use App\Models\Organismo;
+use App\Services\StatsRecalculator;
+use App\Support\SqlDialect;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -410,6 +413,120 @@ class RecalculateStatsTest extends TestCase
         $organismo->refresh();
         $this->assertSame(1, $organismo->total_contratos);
         $this->assertEquals(0.00, (float) $organismo->total_importe);
+    }
+
+    // ----------------------------------------------------------------
+    // Sparklines: serie mensual del top del año
+    // ----------------------------------------------------------------
+
+    /**
+     * @return list<array{nombre: string, nif: string, num_contratos: int, total_importe: float, serie: list<float>}>
+     */
+    private function topDelAnio(int $anio, string $columna, string $tabla): array
+    {
+        $metodo = new \ReflectionMethod(StatsRecalculator::class, 'topDelAnio');
+
+        /** @var list<array{nombre: string, nif: string, num_contratos: int, total_importe: float, serie: list<float>}> $top */
+        $top = $metodo->invoke(new StatsRecalculator, $anio, $columna, $tabla);
+
+        return $top;
+    }
+
+    public function test_top_del_anio_builds_a_twelve_month_serie(): void
+    {
+        $org = $this->makeOrganismo('Q1600001A', 'Junta CLM');
+        $empresa = $this->makeAdjudicatario('B12345674', 'Empresa Serie SL');
+
+        $this->makeContrato([
+            'organismo_id' => $org->id,
+            'adjudicatario_id' => $empresa->id,
+            'fecha_publicacion' => '2024-02-10',
+            'importe_adjudicacion' => 1000.00,
+        ]);
+        $this->makeContrato([
+            'organismo_id' => $org->id,
+            'adjudicatario_id' => $empresa->id,
+            'fecha_publicacion' => '2024-02-20',
+            'importe_adjudicacion' => 500.00,
+        ]);
+        $this->makeContrato([
+            'organismo_id' => $org->id,
+            'adjudicatario_id' => $empresa->id,
+            'fecha_publicacion' => '2024-12-31',
+            'importe_adjudicacion' => 2000.00,
+        ]);
+        // Fuera del año: no debe aparecer en la serie de 2024.
+        $this->makeContrato([
+            'organismo_id' => $org->id,
+            'adjudicatario_id' => $empresa->id,
+            'fecha_publicacion' => '2023-02-01',
+            'importe_adjudicacion' => 9999.00,
+        ]);
+
+        $top = $this->topDelAnio(2024, 'adjudicatario_id', 'adjudicatarios');
+
+        $this->assertCount(1, $top);
+        $this->assertCount(12, $top[0]['serie']);
+        $this->assertSame(
+            [0.0, 1500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2000.0],
+            $top[0]['serie']
+        );
+    }
+
+    public function test_top_del_anio_builds_all_series_in_a_single_query(): void
+    {
+        $org = $this->makeOrganismo('Q1600001A', 'Junta CLM');
+
+        foreach (['B12345674', 'B44531218', 'B98765432'] as $i => $nif) {
+            $empresa = $this->makeAdjudicatario($nif, 'Empresa '.$nif);
+            $this->makeContrato([
+                'organismo_id' => $org->id,
+                'adjudicatario_id' => $empresa->id,
+                'fecha_publicacion' => sprintf('2024-%02d-05', $i + 1),
+                'importe_adjudicacion' => 1000.00 * ($i + 1),
+            ]);
+        }
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $top = $this->topDelAnio(2024, 'adjudicatario_id', 'adjudicatarios');
+
+        $consultas = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $this->assertCount(3, $top);
+
+        $mensuales = array_filter(
+            $consultas,
+            fn (array $c) => str_contains($c['query'], SqlDialect::yearMonth('fecha_publicacion'))
+        );
+        $this->assertCount(1, $mensuales, 'La serie mensual del top debe salir de una única consulta');
+
+        // Agregado + nombres + NIFs + serie: sin N+1 por entidad.
+        $this->assertCount(4, $consultas);
+    }
+
+    public function test_charts_json_top_empresas_includes_serie(): void
+    {
+        $org = $this->makeOrganismo('Q1600001A', 'Junta CLM');
+        $empresa = $this->makeAdjudicatario('B12345674', 'Empresa Charts SL');
+        $this->makeContrato([
+            'organismo_id' => $org->id,
+            'adjudicatario_id' => $empresa->id,
+            'fecha_publicacion' => date('Y').'-03-15',
+            'importe_adjudicacion' => 4000.00,
+        ]);
+
+        $this->artisan('stats:recalculate', ['--entity' => 'charts'])->assertSuccessful();
+
+        $charts = json_decode(Storage::get('mapa-stats/charts.json'), true);
+        $serie = $charts['anio_actual']['top_empresas'][0]['serie'] ?? null;
+
+        $this->assertIsArray($serie);
+        $this->assertCount(12, $serie);
+        // json_encode colapsa 4000.0 a 4000: comparación laxa a propósito.
+        $this->assertEquals(4000.0, $serie[2]);
     }
 
     public function test_recalculate_invalid_entity_fails(): void

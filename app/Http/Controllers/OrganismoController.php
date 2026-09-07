@@ -6,106 +6,140 @@ namespace App\Http\Controllers;
 
 use App\Models\Contrato;
 use App\Models\Organismo;
-use App\Support\SqlDialect;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
+use App\Services\FichaEntidadBuilder;
+use App\Services\RedRelacionesBuilder;
+use App\Services\SerieTemporalBuilder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class OrganismoController extends Controller
 {
+    /** Primer año con datos en el sistema; acota los años válidos en la URL. */
+    private const PRIMER_ANIO = 2008;
+
+    public function __construct(
+        private readonly SerieTemporalBuilder $series,
+        private readonly FichaEntidadBuilder $fichas,
+        private readonly RedRelacionesBuilder $redes,
+    ) {}
+
     public function index(): View
     {
         return view('organismos.index');
     }
 
-    public function show(Organismo $organismo): View
+    /**
+     * Ficha del organismo centrada en un año: el año en curso por defecto, o el último con
+     * actividad. El histórico completo vive en `historico`.
+     */
+    public function show(Organismo $organismo, ?string $year = null): View|RedirectResponse
     {
-        $cacheKey = "organismo:{$organismo->id}:ficha";
+        $serie = $this->series->paraOrganismo($organismo->id);
 
-        $ficha = Cache::remember($cacheKey, 3600, function () use ($organismo) {
-            $yearExpr = SqlDialect::year('fecha_publicacion');
+        $anioActual = (int) date('Y');
+        $anio = $this->anioSolicitado($year);
 
-            $agg = Contrato::forOrganismo($organismo->id)
-                ->selectRaw(
-                    'COUNT(*) as total, '
-                    .'SUM(importe_adjudicacion) as importe_total, '
-                    .'COUNT(DISTINCT adjudicatario_id) as adjudicatarios_distintos, '
-                    .SqlDialect::sumBool('es_menor').' as total_menores'
-                )
-                ->first();
+        if ($year !== null && $anio === null) {
+            return redirect()->route('organismos.show', $organismo->nif, 301);
+        }
 
-            $total = (int) $agg->total;
-            $importeTotal = (float) ($agg->importe_total ?? 0);
-
-            // % sin concurrencia (una sola oferta) sobre los contratos que declaran num_ofertas.
-            $ofertas = Contrato::forOrganismo($organismo->id)
-                ->whereNotNull('num_ofertas')
-                ->selectRaw('COUNT(*) as con_dato')
-                ->selectRaw('SUM(CASE WHEN num_ofertas = 1 THEN 1 ELSE 0 END) as una_oferta')
-                ->first();
-            $conDato = (int) ($ofertas->con_dato ?? 0);
-            $pctSinConcurrencia = $conDato > 0
-                ? round(((int) $ofertas->una_oferta) / $conDato * 100, 1)
-                : null;
-
-            // Índice Herfindahl (HHI) de concentración de proveedores por importe: 0–10.000.
-            // <1.500 competencia, 1.500–2.500 moderada, >2.500 alta dependencia de pocos proveedores.
-            $hhi = null;
-            if ($importeTotal > 0) {
-                $sub = Contrato::forOrganismo($organismo->id)
-                    ->whereNotNull('adjudicatario_id')
-                    ->groupBy('adjudicatario_id')
-                    ->selectRaw('SUM(importe_adjudicacion) as imp');
-                $sumSq = (float) DB::query()->fromSub($sub, 't')
-                    ->selectRaw('COALESCE(SUM(imp * imp), 0) as s')->value('s');
-                $hhi = (int) round($sumSq / ($importeTotal ** 2) * 10000);
-            }
-            $hhiLabel = $hhi === null ? null : ($hhi > 2500 ? 'Alta' : ($hhi >= 1500 ? 'Moderada' : 'Baja'));
-
-            return [
-                'kpis' => [
-                    'total_contratos' => $total,
-                    'importe_total' => $importeTotal,
-                    'adjudicatarios_distintos' => (int) $agg->adjudicatarios_distintos,
-                    'pct_menores' => $total > 0 ? round((int) $agg->total_menores / $total * 100, 1) : 0,
-                    'pct_sin_concurrencia' => $pctSinConcurrencia,
-                    'contratos_con_num_ofertas' => $conDato,
-                    'concentracion_hhi' => $hhi,
-                    'concentracion_label' => $hhiLabel,
-                ],
-                'top_adjudicatarios' => Contrato::forOrganismo($organismo->id)
-                    ->select('adjudicatario_id', DB::raw('COUNT(*) as num_contratos'), DB::raw('SUM(importe_adjudicacion) as total_importe'))
-                    ->whereNotNull('adjudicatario_id')
-                    ->groupBy('adjudicatario_id')
-                    ->orderByDesc('total_importe')
-                    ->limit(10)
-                    ->with('adjudicatario:id,nombre,nif')
-                    ->get(),
-                'distribucion_tipo' => Contrato::forOrganismo($organismo->id)
-                    ->select('tipo_contrato', DB::raw('COUNT(*) as num_contratos'), DB::raw('SUM(importe_adjudicacion) as total_importe'))
-                    ->whereNotNull('tipo_contrato')
-                    ->groupBy('tipo_contrato')
-                    ->orderByDesc('total_importe')
-                    ->get(),
-                'evolucion_anual' => Contrato::forOrganismo($organismo->id)
-                    ->selectRaw("{$yearExpr} as year, COUNT(*) as num_contratos, SUM(importe_adjudicacion) as total_importe")
-                    ->whereNotNull('fecha_publicacion')
-                    ->groupByRaw($yearExpr)
-                    ->orderByDesc('year')
-                    ->get(),
-            ];
-        });
-
-        $ultimosContratos = Contrato::forOrganismo($organismo->id)
-            ->with('adjudicatario:id,nombre,nif')
-            ->orderByDesc('fecha_publicacion')
-            ->paginate(10);
+        $anio ??= $serie->anioReferencia($anioActual) ?? $anioActual;
 
         return view('organismos.show', [
             'organismo' => $organismo,
-            'ficha' => $ficha,
-            'ultimosContratos' => $ultimosContratos,
+            'serie' => $serie,
+            'ficha' => $this->fichas->organismo($organismo->id, $anio),
+            'anio' => $anio,
+            'anioFijado' => $year !== null,
+            'anioActual' => $anioActual,
+            'comparativa' => $serie->comparativaYtd($anio, $anioActual),
+            'ultimosContratos' => $this->contratosDelAnio($organismo, $anio),
             'tipos_contrato' => config('contratacion.tipos_contrato', []),
         ]);
+    }
+
+    /** Histórico completo: todos los años, matriz año × mes y récords. */
+    public function historico(Organismo $organismo): View
+    {
+        $serie = $this->series->paraOrganismo($organismo->id);
+        $anioActual = (int) date('Y');
+
+        $aniosComparados = array_slice(array_reverse($serie->aniosConDatos()), 0, 2);
+        $fichaHistorica = $this->fichas->organismo($organismo->id);
+
+        return view('organismos.historico', [
+            'organismo' => $organismo,
+            'serie' => $serie,
+            'anioActual' => $anioActual,
+            'anios' => $serie->anios(),
+            'matriz' => $serie->matrizAnioMes($anioActual),
+            'seriesComparadas' => $serie->mesesDe($aniosComparados, $anioActual),
+            'ficha' => $fichaHistorica,
+            'contratoMayor' => $this->contratoMayor($organismo, $fichaHistorica['kpis']['contrato_mayor']),
+            'tipos_contrato' => config('contratacion.tipos_contrato', []),
+        ]);
+    }
+
+    /**
+     * Red de relaciones: a qué adjudicatarios contrata y qué otros organismos comparten
+     * esos proveedores.
+     */
+    public function red(Organismo $organismo): View
+    {
+        $serie = $this->series->paraOrganismo($organismo->id);
+        $anioActual = (int) date('Y');
+        $anioReferencia = $serie->anioReferencia($anioActual) ?? $anioActual;
+
+        return view('organismos.red', [
+            'organismo' => $organismo,
+            'serie' => $serie,
+            'anioActual' => $anioActual,
+            'red' => $this->redes->paraOrganismo($organismo->id, $anioReferencia),
+        ]);
+    }
+
+    /** Año pedido en la URL, o null si no es un año plausible del sistema. */
+    private function anioSolicitado(?string $year): ?int
+    {
+        if ($year === null || ! ctype_digit($year)) {
+            return null;
+        }
+
+        $anio = (int) $year;
+
+        return ($anio >= self::PRIMER_ANIO && $anio <= (int) date('Y') + 1) ? $anio : null;
+    }
+
+    /**
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, Contrato>
+     */
+    private function contratosDelAnio(Organismo $organismo, int $anio)
+    {
+        return Contrato::query()
+            ->forOrganismo($organismo->id)
+            ->year($anio)
+            ->with('adjudicatario:id,nombre,nif')
+            ->orderByDesc('fecha_publicacion')
+            ->paginate(10)
+            ->withQueryString();
+    }
+
+    /**
+     * Contrato de mayor importe. Se busca por igualdad contra el máximo que ya calculó la
+     * ficha, en vez de con `orderByDesc('importe_adjudicacion')`: ese orden hace que
+     * PostgreSQL recorra el índice global de importes de mayor a menor hasta dar con una
+     * fila de la entidad — 6,9 s en el organismo mayor. Por igualdad son milisegundos.
+     */
+    private function contratoMayor(Organismo $organismo, ?float $importeMaximo): ?Contrato
+    {
+        if ($importeMaximo === null) {
+            return null;
+        }
+
+        return Contrato::query()
+            ->forOrganismo($organismo->id)
+            ->where('importe_adjudicacion', $importeMaximo)
+            ->with('adjudicatario:id,nombre,nif')
+            ->first();
     }
 }

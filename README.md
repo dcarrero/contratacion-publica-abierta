@@ -14,9 +14,9 @@ Si no quieres montarlo tú mismo, podrás consultar los datos en **[contratacion
 
 ## Datos actuales
 
-- **~8,2 millones** de contratos públicos
-- **~17.100** organismos contratantes
-- **~605.000** adjudicatarios
+- **~8,9 millones** de contratos públicos
+- **~17.300** organismos contratantes
+- **~644.000** adjudicatarios
 - **19 CCAA** cubiertas (varias con fuente regional propia + resto vía PLACSP)
 - Múltiples fuentes de datos activas (ver más abajo)
 
@@ -89,7 +89,12 @@ php artisan stats:recalculate
 | Fuente | Tipo | Frecuencia |
 |--------|------|------------|
 | [Licitaciones](https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom) | Atom/XML CODICE | Diaria |
-| [Contratos Menores](https://contrataciondelsectorpublico.gob.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes.atom) | Atom/XML CODICE | Semanal |
+| [Contratos Menores](https://contrataciondelsectorpublico.gob.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes.atom) | Atom/XML CODICE | Diaria |
+| [Plataformas agregadas](https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom) | Atom/XML CODICE | Diaria |
+
+Los dos primeros canales y el de plataformas agregadas son **disjuntos**: un organismo publica
+directamente en PLACSP o a través de la plataforma de su comunidad, nunca en ambos. Por eso el
+tercero es necesario para cubrir Cataluña, Euskadi, Andalucía, Madrid, Galicia, Navarra y La Rioja.
 
 ### Fuentes regionales (datos abiertos de cada CCAA)
 
@@ -106,6 +111,12 @@ php artisan stats:recalculate
 | Madrid | `regional:sync-mad` | Atom CODICE |
 | Región de Murcia | `regional:sync-mur` | CSV (CARM) |
 
+### Fuentes municipales
+
+| Entidad | Comando | Tipo |
+|---------|---------|------|
+| Ayuntamiento de Madrid (menores) | `regional:sync-mad-ayto` | CKAN CSV |
+
 ## Principios
 
 - **NIF como verdad**: organismos y adjudicatarios se identifican por NIF, nunca por nombre.
@@ -115,9 +126,14 @@ php artisan stats:recalculate
 
 ## Funcionalidades
 
-Búsqueda full-text, mapa coroplético (Leaflet), análisis y gráficas (Chart.js), rankings con gasto
-per cápita, grafo de relaciones (D3.js), detección de anomalías, alertas por email y RSS, e informes
-por CCAA/anuales con exportación CSV y PDF. Interfaz accesible (WCAG 2.2 AA).
+Fichas de empresa, organismo y comunidad centradas en el año en curso, con comparativa
+interanual sobre el mismo tramo de meses y evolución mes a mes; páginas de histórico con matriz
+de actividad por mes y año; vistas por año concreto; red de relaciones por entidad.
+
+Además: búsqueda full-text, mapa coroplético (Leaflet), análisis y gráficas (Chart.js), rankings
+con gasto per cápita y tendencia mensual, grafo de relaciones (D3.js), detección de anomalías,
+alertas por email y RSS, e informes por CCAA/anuales con exportación CSV y PDF. Interfaz
+accesible (WCAG 2.2 AA) y usable en móvil.
 
 ## Referencias
 

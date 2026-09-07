@@ -3,6 +3,63 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.9.0] - 2026-09-07
+
+### Añadido
+
+- **Fichas centradas en el año en curso**: las páginas de empresa, organismo y comunidad
+  autónoma muestran ahora la actividad del año con su variación respecto al anterior, en vez
+  de mezclar todos los ejercicios en un único total. La comparación se hace sobre el mismo
+  tramo de meses (por ejemplo enero–agosto contra enero–agosto), para no medir un año
+  incompleto contra uno entero.
+- **Páginas de histórico** (`/empresas/{nif}/historico` y equivalentes en organismos,
+  administraciones y a nivel nacional): evolución año a año con variación interanual,
+  comparativa mes a mes entre ejercicios, matriz de actividad por mes y año, y récords.
+- **Vistas por año concreto** (`/empresas/{nif}/2024`), enlazables e indexables.
+- **Red de relaciones** por entidad: grafo de las contrapartes directas y de quién más
+  contrata con ellas, en su propia página.
+- **Aviso de entidad sin actividad**: cuando una empresa u organismo no tiene contratos en el
+  año en curso se indica de forma explícita y se ofrece su histórico, en lugar de mostrar una
+  ficha vacía.
+- **Gráficas de tendencia** en los rankings de la portada: cada fila incluye la evolución
+  mensual, para distinguir la actividad sostenida de un pico puntual.
+- **Nuevas fuentes de datos**: canal de plataformas agregadas de la Plataforma de Contratación
+  del Sector Público (Cataluña, Euskadi, Andalucía, Madrid, Galicia, Navarra y La Rioja) con
+  sincronización diaria, y contratos menores del Ayuntamiento de Madrid desde su portal de
+  datos abiertos.
+- **Fusión de contratos duplicados** entre fuentes distintas (`data:merge-duplicados`), para
+  los casos en que el mismo contrato se publica en dos portales con identificadores propios.
+
+### Cambiado
+
+- **Notación de importes unificada**: se elimina la escala de tres niveles que hacía convivir
+  "5,7 M€" con "11,3 Md€" —y con variantes distintas según la página—. Todo lo que llega al
+  millón se expresa en millones y por debajo se dan los euros completos.
+- **Jerarquía visual**: las páginas distinguen ahora el bloque principal, las secciones de
+  apoyo y las notas, en vez de presentarlo todo con el mismo peso. Titulares con tipografía
+  propia y escala de encabezados coherente.
+- **Tablas de contratos usables en móvil**: por debajo de pantalla pequeña cada contrato se
+  presenta como ficha apilada, sin desplazamiento horizontal, y muestra el organismo o
+  adjudicatario que antes quedaba oculto.
+- **Nombres alternativos de adjudicatario colapsados**: las empresas con cientos de variantes
+  de nombre (hasta 746) ya no empujan el contenido fuera de la pantalla.
+- Cifras de ancho fijo en tablas y paneles, para poder compararlas verticalmente.
+
+### Corregido
+
+- **Actualización de datos incompleta**: la importación de archivos anuales reutilizaba la
+  copia local sin comprobar si el fichero publicado había cambiado. Como el archivo del año en
+  curso se regenera a diario, el proceso reprocesaba una copia antigua e informaba de "0
+  nuevos". Ahora se revalida contra el origen, y los archivos de años cerrados siguen
+  sirviéndose de la copia local.
+- **Búsqueda de contratos mucho más rápida**: el orden por defecto obligaba a recorrer la tabla
+  completa. Con un índice sobre la expresión de ordenación, la consulta pasa de segundos a
+  milisegundos.
+- **Canal de sindicación obsoleto** en la configuración, que respondía con una página de error
+  en lugar de datos.
+- Fechas con año de dos dígitos en los ficheros del Ayuntamiento de Madrid, que dejaban sin
+  fecha a una parte de los contratos importados.
+
 ## [1.8.0] - 2026-07-10
 
 ### Añadido

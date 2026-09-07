@@ -297,16 +297,8 @@ class DetectarAnomalias extends Command
 
     private function formatImporte(float|string $valor): string
     {
-        $valor = (float) $valor;
-
-        if ($valor >= 1_000_000) {
-            return number_format($valor / 1_000_000, 1, ',', '.').' M€';
-        }
-        if ($valor >= 1_000) {
-            return number_format($valor / 1_000, 0, ',', '.').' K€';
-        }
-
-        return number_format($valor, 0, ',', '.').' €';
+        // Misma escala que el resto del sitio: millones o euros completos, sin K€.
+        return formatImporteCorto((float) $valor);
     }
 
     private function formatMultiplicador(float $ratio): string

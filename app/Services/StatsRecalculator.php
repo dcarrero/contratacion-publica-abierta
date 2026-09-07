@@ -163,6 +163,21 @@ class StatsRecalculator
             Storage::put("mapa-stats/provincias-{$ca->nuts}.json", json_encode($provStats, JSON_UNESCAPED_UNICODE));
         }
 
+        // Serie mensual por CCAA: una sola pasada agrupando por (NUTS2, año-mes). Calcularla
+        // al vuelo en cada visita cuesta ~5 s por comunidad grande (medio millón de filas
+        // por prefijo NUTS), así que se precomputa aquí y la ficha la lee del JSON.
+        $yearMonth = SqlDialect::yearMonth('fecha_publicacion');
+        $seriesPorCcaa = DB::table('contratos')
+            ->whereNotNull('nuts')
+            ->where('nuts', '!=', '')
+            ->selectRaw(SqlDialect::left('nuts', 4).' as nuts_prefix')
+            ->selectRaw("{$yearMonth} as periodo")
+            ->selectRaw('COUNT(*) as num')
+            ->selectRaw('COALESCE(SUM(importe_adjudicacion), 0) as importe')
+            ->groupByRaw(SqlDialect::left('nuts', 4).", {$yearMonth}")
+            ->get()
+            ->groupBy('nuts_prefix');
+
         // Administraciones: stats detalladas por CCAA (organismos, adjudicatarios, top organismos)
         foreach ($ccaaList as $ca) {
             $totalOrganismos = Organismo::whereHas('contratos', function ($q) use ($ca) {
@@ -196,10 +211,54 @@ class StatsRecalculator
                 'total_organismos' => $totalOrganismos,
                 'total_adjudicatarios' => $totalAdjudicatarios,
                 'top_organismos_ids' => $topOrganismosIds,
+                ...$this->serieMensualDeCcaa($seriesPorCcaa, $ca->nuts),
             ];
 
             Storage::put("mapa-stats/admin-{$ca->nuts}.json", json_encode($adminData, JSON_UNESCAPED_UNICODE));
         }
+    }
+
+    /**
+     * Serie mensual de una CCAA a partir de la agrupación global por NUTS2: suma los
+     * prefijos que cuelgan de ella y separa los contratos sin fecha (periodo nulo), que
+     * quedan fuera de cualquier serie temporal.
+     *
+     * @param  \Illuminate\Support\Collection<int|string, \Illuminate\Support\Collection<int, \stdClass>>  $seriesPorCcaa
+     * @return array{serie_mensual: list<array{anio: int, mes: int, num: int, importe: float}>, serie_sin_fecha: int}
+     */
+    private function serieMensualDeCcaa($seriesPorCcaa, string $nuts): array
+    {
+        $porPeriodo = [];
+        $sinFecha = 0;
+
+        foreach ($seriesPorCcaa as $prefix => $filas) {
+            if (! str_starts_with((string) $prefix, $nuts)) {
+                continue;
+            }
+
+            foreach ($filas as $fila) {
+                [$anio, $mes] = array_pad(explode('-', (string) $fila->periodo, 2), 2, null);
+
+                if ($anio === null || $mes === null || ! ctype_digit($anio) || ! ctype_digit($mes)) {
+                    $sinFecha += (int) $fila->num;
+
+                    continue;
+                }
+
+                $clave = $anio.'-'.$mes;
+                $porPeriodo[$clave]['anio'] = (int) $anio;
+                $porPeriodo[$clave]['mes'] = (int) $mes;
+                $porPeriodo[$clave]['num'] = ($porPeriodo[$clave]['num'] ?? 0) + (int) $fila->num;
+                $porPeriodo[$clave]['importe'] = ($porPeriodo[$clave]['importe'] ?? 0.0) + (float) $fila->importe;
+            }
+        }
+
+        ksort($porPeriodo);
+
+        return [
+            'serie_mensual' => array_values($porPeriodo),
+            'serie_sin_fecha' => $sinFecha,
+        ];
     }
 
     /**
@@ -388,7 +447,14 @@ class StatsRecalculator
                 ->all();
         }
 
+        // 8. Serie mensual nacional completa y rankings del año en curso: los consume la
+        // portada, que muestra el año en curso comparado con el anterior. Calcularlos al
+        // vuelo obligaría a recorrer los 8,6M de contratos en cada visita.
+        $serieNacional = $this->serieMensualNacional($monthExpr);
+        Storage::put('mapa-stats/serie-nacional.json', json_encode($serieNacional, JSON_UNESCAPED_UNICODE));
+
         $charts = [
+            'anio_actual' => $this->rankingsDelAnio((int) date('Y')),
             'evolucion_anual' => $evolucionAnual,
             'distribucion_tipo' => $distribucionTipo,
             'distribucion_ccaa' => $distribucionCcaa,
@@ -407,6 +473,145 @@ class StatsRecalculator
         Storage::put('mapa-stats/charts.json', $json);
 
         return null;
+    }
+
+    /**
+     * Serie mensual de toda España. Los contratos sin fecha de publicación agrupan bajo un
+     * periodo nulo y se cuentan aparte, como en las series por comunidad.
+     *
+     * @return array{serie_mensual: list<array{anio: int, mes: int, num: int, importe: float}>, serie_sin_fecha: int}
+     */
+    private function serieMensualNacional(string $monthExpr): array
+    {
+        $filas = [];
+        $sinFecha = 0;
+
+        $resultado = DB::table('contratos')
+            ->selectRaw("{$monthExpr} as periodo")
+            ->selectRaw('COUNT(*) as num')
+            ->selectRaw('COALESCE(SUM(importe_adjudicacion), 0) as importe')
+            ->groupByRaw($monthExpr)
+            ->orderByRaw($monthExpr)
+            ->get();
+
+        foreach ($resultado as $fila) {
+            [$anio, $mes] = array_pad(explode('-', (string) $fila->periodo, 2), 2, null);
+
+            if ($anio === null || $mes === null || ! ctype_digit($anio) || ! ctype_digit($mes)) {
+                $sinFecha += (int) $fila->num;
+
+                continue;
+            }
+
+            $filas[] = [
+                'anio' => (int) $anio,
+                'mes' => (int) $mes,
+                'num' => (int) $fila->num,
+                'importe' => (float) $fila->importe,
+            ];
+        }
+
+        return ['serie_mensual' => $filas, 'serie_sin_fecha' => $sinFecha];
+    }
+
+    /**
+     * Quién más contrató y quién más adjudicó en un año concreto. Los contadores
+     * `total_importe` de organismos y adjudicatarios son históricos, así que el ranking del
+     * año hay que agregarlo desde los contratos.
+     *
+     * @return array{anio: int, top_empresas: list<array{nombre: string, nif: string, num_contratos: int, total_importe: float, serie: list<float>}>, top_organismos: list<array{nombre: string, nif: string, num_contratos: int, total_importe: float, serie: list<float>}>}
+     */
+    private function rankingsDelAnio(int $anio): array
+    {
+        return [
+            'anio' => $anio,
+            'top_empresas' => $this->topDelAnio($anio, 'adjudicatario_id', 'adjudicatarios'),
+            'top_organismos' => $this->topDelAnio($anio, 'organismo_id', 'organismos'),
+        ];
+    }
+
+    /**
+     * @return list<array{nombre: string, nif: string, num_contratos: int, total_importe: float, serie: list<float>}>
+     */
+    private function topDelAnio(int $anio, string $columna, string $tabla): array
+    {
+        $agregados = DB::table('contratos')
+            ->where('fecha_publicacion', '>=', sprintf('%04d-01-01', $anio))
+            ->where('fecha_publicacion', '<', sprintf('%04d-01-01', $anio + 1))
+            ->whereNotNull($columna)
+            ->groupBy($columna)
+            ->selectRaw("{$columna} as entidad_id")
+            ->selectRaw('COUNT(*) as num_contratos')
+            ->selectRaw('COALESCE(SUM(importe_adjudicacion), 0) as total_importe')
+            ->orderByDesc('total_importe')
+            ->limit(10)
+            ->get();
+
+        if ($agregados->isEmpty()) {
+            return [];
+        }
+
+        $ids = $agregados->pluck('entidad_id')->map(fn ($id) => (int) $id)->all();
+
+        $nombres = DB::table($tabla)
+            ->whereIn('id', $ids)
+            ->pluck('nombre', 'id');
+        $nifs = DB::table($tabla)
+            ->whereIn('id', $ids)
+            ->pluck('nif', 'id');
+
+        $series = $this->seriesMensualesDelAnio($anio, $columna, $ids);
+
+        return $agregados
+            ->map(fn ($fila) => [
+                'nombre' => (string) ($nombres[$fila->entidad_id] ?? '—'),
+                'nif' => (string) ($nifs[$fila->entidad_id] ?? ''),
+                'num_contratos' => (int) $fila->num_contratos,
+                'total_importe' => (float) $fila->total_importe,
+                'serie' => $series[(int) $fila->entidad_id] ?? array_fill(0, 12, 0.0),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Importe mensual (12 posiciones, enero-diciembre) de cada entidad del top. Se resuelve
+     * con una única consulta agrupada por entidad y mes: una consulta por entidad
+     * multiplicaría por diez el recorrido sobre la tabla de contratos.
+     *
+     * @param  list<int>  $entidadIds
+     * @return array<int, list<float>>
+     */
+    private function seriesMensualesDelAnio(int $anio, string $columna, array $entidadIds): array
+    {
+        $monthExpr = SqlDialect::yearMonth('fecha_publicacion');
+
+        $series = [];
+        foreach ($entidadIds as $id) {
+            $series[$id] = array_fill(0, 12, 0.0);
+        }
+
+        $filas = DB::table('contratos')
+            ->where('fecha_publicacion', '>=', sprintf('%04d-01-01', $anio))
+            ->where('fecha_publicacion', '<', sprintf('%04d-01-01', $anio + 1))
+            ->whereIn($columna, $entidadIds)
+            ->groupBy($columna)
+            ->groupByRaw($monthExpr)
+            ->selectRaw("{$columna} as entidad_id")
+            ->selectRaw("{$monthExpr} as periodo")
+            ->selectRaw('COALESCE(SUM(importe_adjudicacion), 0) as importe')
+            ->get();
+
+        foreach ($filas as $fila) {
+            $entidad = (int) $fila->entidad_id;
+            $mes = (int) substr((string) $fila->periodo, 5, 2);
+
+            if ($mes >= 1 && $mes <= 12 && isset($series[$entidad])) {
+                $series[$entidad][$mes - 1] = (float) $fila->importe;
+            }
+        }
+
+        return $series;
     }
 
     /**

@@ -1,214 +1,261 @@
+@php
+    $periodoComparado = $comparativa['completo']
+        ? 'vs '.$comparativa['anio_anterior']
+        : 'en '.$comparativa['periodo'].' vs '.$comparativa['anio_anterior'];
+    $comparableConElAnio = $comparativa['anio'] === $anio;
+@endphp
 <x-layouts.app title="Contratación Abierta — Dashboard">
 
     <h1 class="sr-only">Contratación pública en España: panel de indicadores</h1>
 
-    {{-- KPI Cards --}}
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <div class="bg-white rounded-lg shadow p-6">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Contratos</p>
-            <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($kpis['total_contratos'], 0, ',', '.') }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Volumen adjudicado</p>
-            <p class="text-3xl font-bold text-primary mt-1">{{ formatImporteCorto($kpis['volumen']) }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Organismos</p>
-            <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($kpis['total_organismos'], 0, ',', '.') }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Adjudicatarios</p>
-            <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($kpis['total_adjudicatarios'], 0, ',', '.') }}</p>
-        </div>
-    </section>
+    <div class="space-y-10 sm:space-y-12">
 
-    {{-- Gráficas --}}
-    @if($charts)
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-        {{-- Evolución anual --}}
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Evolución anual</h2>
-            <x-chart id="chartEvolucion" height="300px" />
-        </div>
+        {{-- Bloque principal: el año en curso, no el acumulado de 18 años (que vive en
+             /historico). Cifras y gráfico del año van juntos en la única pieza elevada
+             de la portada. --}}
+        <div>
+            <x-ui.panel destacado kpi-cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <x-slot:cabecera>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <h2 class="font-serif text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
+                            Contratación en {{ $anio }}
+                            @if($anio === $anioActual)
+                                <span class="font-sans text-sm font-normal text-gray-500">(año en curso)</span>
+                            @endif
+                        </h2>
+                        <a href="{{ route('historico') }}" class="text-sm font-medium text-primary hover:underline">
+                            Ver datos históricos →
+                        </a>
+                    </div>
+                </x-slot:cabecera>
 
-        {{-- Distribución por comunidades autónomas --}}
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Contratación por comunidad autónoma</h2>
-            <x-chart id="chartCcaa" type="bar" height="300px" />
-        </div>
-    </section>
+                <x-slot:kpis>
+                    <x-serie.kpi-delta plano
+                        etiqueta="Contratos"
+                        :valor="number_format($totalAnio['num'], 0, ',', '.')"
+                        :delta="$comparableConElAnio ? $comparativa['variacion_num'] : null"
+                        :periodo="$comparableConElAnio ? $periodoComparado : null" />
 
-    <section class="mb-10">
-        {{-- Top 10 sectores CPV --}}
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Top 10 sectores (CPV)</h2>
-            <x-chart id="chartCpv" type="bar" height="350px" />
-        </div>
-    </section>
-    @endif
+                    <x-serie.kpi-delta plano destacado
+                        etiqueta="Volumen adjudicado"
+                        :valor="formatImporteCorto($totalAnio['importe'])"
+                        :delta="$comparableConElAnio ? $comparativa['variacion_importe'] : null"
+                        :periodo="$comparableConElAnio ? $periodoComparado : null" />
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-        {{-- Top 10 Empresas --}}
-        <section>
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Top 10 adjudicatarios por importe</h2>
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <caption class="sr-only">Top 10 adjudicatarios por importe</caption>
-                        <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                            <tr>
-                                <th scope="col" class="px-4 py-3 text-left">#</th>
-                                <th scope="col" class="px-4 py-3 text-left">Nombre</th>
-                                <th scope="col" class="px-4 py-3 text-left">NIF</th>
-                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
-                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($topEmpresas as $i => $empresa)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
-                                <td class="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">
-                                    <a href="{{ route('empresas.show', $empresa->nif) }}" class="hover:text-primary hover:underline">{{ $empresa->nombre }}</a>
-                                </td>
-                                <td class="px-4 py-3 text-gray-500 font-mono text-xs">{{ $empresa->nif }}</td>
-                                <td class="px-4 py-3 text-right">{{ number_format($empresa->total_contratos, 0, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right font-medium">{{ formatImporteCorto($empresa->total_importe) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <x-serie.kpi-delta plano
+                        etiqueta="Organismos"
+                        :valor="number_format($totalesHistoricos['organismos'], 0, ',', '.')"
+                        delta-abs="registrados en total" />
+
+                    <x-serie.kpi-delta plano
+                        etiqueta="Adjudicatarios"
+                        :valor="number_format($totalesHistoricos['adjudicatarios'], 0, ',', '.')"
+                        delta-abs="registrados en total" />
+                </x-slot:kpis>
+
+                <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Mes a mes: {{ implode(' vs ', array_keys($seriesGrafico)) }}
+                </h3>
+                <div class="mt-3">
+                    <x-serie.grafico-mensual id="portadaGraficoMensual" :series="$seriesGrafico" height="320px" />
                 </div>
-            </div>
-        </section>
+            </x-ui.panel>
 
-        {{-- Top 10 Organismos --}}
-        <section>
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Top 10 organismos por importe</h2>
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <caption class="sr-only">Top 10 organismos por importe</caption>
-                        <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                            <tr>
-                                <th scope="col" class="px-4 py-3 text-left">#</th>
-                                <th scope="col" class="px-4 py-3 text-left">Nombre</th>
-                                <th scope="col" class="px-4 py-3 text-left">NIF</th>
-                                <th scope="col" class="px-4 py-3 text-right">Contratos</th>
-                                <th scope="col" class="px-4 py-3 text-right">Importe</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($topOrganismos as $i => $org)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
-                                <td class="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">
-                                    <a href="{{ route('organismos.show', $org->nif) }}" class="hover:text-primary hover:underline">{{ $org->nombre }}</a>
-                                </td>
-                                <td class="px-4 py-3 text-gray-500 font-mono text-xs">{{ $org->nif }}</td>
-                                <td class="px-4 py-3 text-right">{{ number_format($org->total_contratos, 0, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right font-medium">{{ formatImporteCorto($org->total_importe) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+            <p class="mt-3 text-sm text-gray-500">
+                Acumulado desde {{ $serie->primerAnio() }}:
+                <strong>{{ number_format($serie->totales()['num'], 0, ',', '.') }}</strong> contratos por
+                <strong>{{ formatImporteCorto($serie->totales()['importe']) }}</strong>.
+                <a href="{{ route('historico') }}" class="text-primary hover:underline">Ver histórico completo</a>.
+            </p>
+            @if($comparableConElAnio && ! $comparativa['completo'])
+                <x-ui.nota class="mt-1">
+                    Las variaciones comparan {{ $comparativa['periodo'] }} de {{ $comparativa['anio'] }} con el mismo
+                    periodo de {{ $comparativa['anio_anterior'] }}, para no medir un año incompleto contra uno entero.
+                </x-ui.nota>
+            @endif
+        </div>
+
+        {{-- Evolución anual: el contexto largo bajo el detalle del año en curso, a media
+             altura para que no le robe protagonismo. El desglose está en /historico. --}}
+        @php $aniosPortada = array_slice($serie->anios(), 0, 12); @endphp
+        @if(count($aniosPortada) > 1)
+        <x-ui.seccion titulo="Evolución por años">
+            <x-slot:accion>
+                <a href="{{ route('historico') }}" class="font-medium text-primary hover:underline">Ver todos los años →</a>
+            </x-slot:accion>
+            <x-ui.tarjeta>
+                <x-chart id="portadaGraficoAnual" height="160px" />
+            </x-ui.tarjeta>
+        </x-ui.seccion>
+        @endif
+
+        {{-- Gráficas --}}
+        @if($charts)
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <x-ui.seccion titulo="Contratación por comunidad autónoma">
+                <x-ui.tarjeta>
+                    <x-chart id="chartCcaa" type="bar" height="300px" />
+                </x-ui.tarjeta>
+            </x-ui.seccion>
+
+            <x-ui.seccion titulo="Top 10 sectores (CPV)">
+                <x-ui.tarjeta>
+                    <x-chart id="chartCpv" type="bar" height="300px" />
+                </x-ui.tarjeta>
+            </x-ui.seccion>
+        </div>
+        @endif
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {{-- Top 10 Empresas --}}
+            <x-ui.seccion :titulo="$rankingsAnio ? 'Top 10 adjudicatarios en '.$rankingsAnio['anio'] : 'Top 10 adjudicatarios por importe (histórico)'">
+                <x-ui.tarjeta :padding="false">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <caption class="sr-only">{{ $rankingsAnio ? 'Top 10 adjudicatarios en '.$rankingsAnio['anio'] : 'Top 10 adjudicatarios por importe (histórico)' }}</caption>
+                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 text-left">#</th>
+                                    <th scope="col" class="px-3 py-3 text-left">Nombre</th>
+                                    <th scope="col" class="px-3 py-3 text-right">Contratos</th>
+                                    <th scope="col" class="px-3 py-3 text-right">Importe</th>
+                                    <th scope="col" class="px-3 py-3 text-left hidden sm:table-cell w-16">Tendencia</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach($rankingsAnio['top_empresas'] ?? $topEmpresas as $i => $empresa)
+                                @php $fila = is_array($empresa) ? $empresa : ['nombre' => $empresa->nombre, 'nif' => $empresa->nif, 'num_contratos' => $empresa->total_contratos, 'total_importe' => $empresa->total_importe]; @endphp
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-3 text-gray-500">{{ $i + 1 }}</td>
+                                    <td class="px-3 py-3 font-medium text-gray-900 max-w-[13rem] truncate">
+                                        <a href="{{ route('empresas.show', $fila['nif']) }}" class="hover:text-primary hover:underline">{{ $fila['nombre'] }}</a>
+                                    </td>
+                                    <td class="px-3 py-3 text-right">{{ number_format($fila['num_contratos'], 0, ',', '.') }}</td>
+                                    <td class="px-3 py-3 text-right font-medium whitespace-nowrap">{{ formatImporteCorto($fila['total_importe']) }}</td>
+                                    <td class="px-3 py-3 hidden sm:table-cell">
+                                        <x-serie.sparkline :valores="$fila['serie'] ?? []" :anio="$rankingsAnio['anio'] ?? null" :ancho="56" :alto="20" />
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </x-ui.tarjeta>
+            </x-ui.seccion>
+
+            {{-- Top 10 Organismos --}}
+            <x-ui.seccion :titulo="$rankingsAnio ? 'Top 10 organismos en '.$rankingsAnio['anio'] : 'Top 10 organismos por importe (histórico)'">
+                <x-ui.tarjeta :padding="false">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <caption class="sr-only">{{ $rankingsAnio ? 'Top 10 organismos en '.$rankingsAnio['anio'] : 'Top 10 organismos por importe (histórico)' }}</caption>
+                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 text-left">#</th>
+                                    <th scope="col" class="px-3 py-3 text-left">Nombre</th>
+                                    <th scope="col" class="px-3 py-3 text-right">Contratos</th>
+                                    <th scope="col" class="px-3 py-3 text-right">Importe</th>
+                                    <th scope="col" class="px-3 py-3 text-left hidden sm:table-cell w-16">Tendencia</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach($rankingsAnio['top_organismos'] ?? $topOrganismos as $i => $org)
+                                @php $fila = is_array($org) ? $org : ['nombre' => $org->nombre, 'nif' => $org->nif, 'num_contratos' => $org->total_contratos, 'total_importe' => $org->total_importe]; @endphp
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-3 text-gray-500">{{ $i + 1 }}</td>
+                                    <td class="px-3 py-3 font-medium text-gray-900 max-w-[13rem] truncate">
+                                        <a href="{{ route('organismos.show', $fila['nif']) }}" class="hover:text-primary hover:underline">{{ $fila['nombre'] }}</a>
+                                    </td>
+                                    <td class="px-3 py-3 text-right">{{ number_format($fila['num_contratos'], 0, ',', '.') }}</td>
+                                    <td class="px-3 py-3 text-right font-medium whitespace-nowrap">{{ formatImporteCorto($fila['total_importe']) }}</td>
+                                    <td class="px-3 py-3 hidden sm:table-cell">
+                                        <x-serie.sparkline :valores="$fila['serie'] ?? []" :anio="$rankingsAnio['anio'] ?? null" :ancho="56" :alto="20" />
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </x-ui.tarjeta>
+            </x-ui.seccion>
+        </div>
+
+        {{-- Últimos 20 contratos --}}
+        <x-ui.seccion titulo="Últimos 20 contratos publicados">
+            <x-ui.tarjeta :padding="false">
+                <x-tabla.contratos
+                    :contratos="$ultimosContratos"
+                    caption="Últimos 20 contratos publicados"
+                    contraparte="organismo"
+                    contraparte-etiqueta="Organismo"
+                    :contraparte-limite="0"
+                    :contraparte-solo-md="false"
+                    :importe-corto="false"
+                    :mostrar-placsp="true"
+                />
+            </x-ui.tarjeta>
+        </x-ui.seccion>
     </div>
 
-    {{-- Últimos 20 contratos --}}
-    <section class="mb-10">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Últimos 20 contratos publicados</h2>
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <caption class="sr-only">Últimos 20 contratos publicados</caption>
-                    <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 text-left">Fecha</th>
-                            <th scope="col" class="px-4 py-3 text-left">Objeto</th>
-                            <th scope="col" class="px-4 py-3 text-left">Organismo</th>
-                            <th scope="col" class="px-4 py-3 text-right">Importe</th>
-                            <th scope="col" class="px-4 py-3 text-center">PLACSP</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @foreach($ultimosContratos as $contrato)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ formatFecha($contrato->fecha_publicacion ?? $contrato->fecha_adjudicacion ?? $contrato->fecha_formalizacion) }}</td>
-                            <td class="px-4 py-3 text-gray-900 max-w-md">
-                                <a href="{{ route('contratos.show', $contrato->placsp_id) }}" title="{{ $contrato->objeto }}" class="hover:text-primary hover:underline">{{ Str::limit($contrato->objeto, 80) }}</a>
-                            </td>
-                            <td class="px-4 py-3 text-gray-600 max-w-xs truncate">{{ $contrato->organismo?->nombre ?? '—' }}</td>
-                            <td class="px-4 py-3 text-right font-medium whitespace-nowrap">{{ formatImporte($contrato->importe_adjudicacion) }}</td>
-                            <td class="px-4 py-3 text-center">
-                                @if($contrato->url_placsp)
-                                <a href="{{ $contrato->url_placsp }}" target="_blank" rel="noopener" class="text-primary hover:text-primary-oscuro underline text-xs">
-                                    Ver
-                                </a>
-                                @else
-                                    —
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
 
+<x-serie.chartjs />
 
-@if($charts)
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const chartColors = ['#dc2626','#2563eb','#16a34a','#d97706','#7c3aed','#db2777','#0891b2','#65a30d','#ea580c','#6366f1'];
-    const fmt = v => {
-        if (v >= 1e9) return (v/1e9).toFixed(1) + ' MM€';
-        if (v >= 1e6) return (v/1e6).toFixed(1) + ' M€';
-        if (v >= 1e3) return (v/1e3).toFixed(0) + ' K€';
-        return v.toFixed(0) + ' €';
-    };
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
 
-    // Evolución anual (últimos 8 años)
-    const evData = @json($charts['evolucion_anual']);
-    const evRecent = evData.slice(-8);
-    new Chart(document.getElementById('chartEvolucion'), {
+    const anualData = @json(array_reverse(array_slice($serie->anios(), 0, 12)));
+    const canvasAnual = document.getElementById('portadaGraficoAnual');
+    if (!canvasAnual || anualData.length < 2) return;
+
+    const anioActual = @json($anio);
+
+    new Chart(canvasAnual, {
         type: 'bar',
         data: {
-            labels: evRecent.map(d => d.year),
+            labels: anualData.map(d => d.anio),
             datasets: [{
-                label: 'Contratos',
-                data: evRecent.map(d => d.num_contratos),
-                backgroundColor: 'rgba(220,38,38,0.7)',
-                yAxisID: 'y',
-                order: 2
-            }, {
-                label: 'Importe',
-                data: evRecent.map(d => d.total_importe),
-                type: 'line',
-                borderColor: '#2563eb',
-                backgroundColor: 'rgba(37,99,235,0.1)',
-                fill: true,
-                tension: 0.3,
-                yAxisID: 'y1',
-                order: 1
+                label: 'Importe adjudicado',
+                data: anualData.map(d => d.importe),
+                // El año en curso destaca; los cerrados quedan como contexto.
+                backgroundColor: anualData.map(d => d.anio === anioActual ? '#dc2626' : 'rgba(148,163,184,0.55)'),
+                borderRadius: 3,
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { position: 'bottom' } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const fila = anualData[ctx.dataIndex];
+                            return window.formatImporteCorto(fila.importe)
+                                + ' · ' + fila.num.toLocaleString('es-ES') + ' contratos'
+                                + (fila.anio === anioActual ? ' (año en curso)' : '');
+                        }
+                    }
+                }
+            },
             scales: {
-                y: { position: 'left', ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(0)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v } },
-                y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: v => fmt(v) } }
+                x: { grid: { display: false } },
+                y: { ticks: { callback: v => window.formatImporteCorto(v), maxTicksLimit: 4 } }
             }
         }
     });
+});
+</script>
+@endpush
+
+@if($charts)
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') return;
+    const chartColors = ['#dc2626','#2563eb','#16a34a','#d97706','#7c3aed','#db2777','#0891b2','#65a30d','#ea580c','#6366f1'];
+    const fmt = window.formatImporteCorto;
 
     // Contratación por comunidad autónoma (horizontal bar, top 10)
     const ccaaData = @json($charts['distribucion_ccaa'] ?? []);

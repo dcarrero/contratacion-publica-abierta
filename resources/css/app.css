@@ -1,6 +1,12 @@
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+/* Las vistas COMPILADAS, no solo las fuentes: Blade genera clases que no aparecen
+   literalmente en los .blade.php (utilidades de la paginación de Laravel, de componentes
+   Livewire y de directivas @class). Sin esta línea se pierden ~860 clases y el CSS baja de
+   80 a 65 KB con estilos rotos. La contrapartida es que el resultado depende de qué haya
+   en storage/framework/views al construir: por eso npm run build cachea las vistas antes
+   (ver package.json). No la quites pensando que la cubre el source de los blade. */
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
@@ -8,10 +14,34 @@
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Titulares. Newsreader es una serif de prensa digital: altura de x alta, contraste
+       moderado y anchura contenida, que es lo que hace falta aquí, donde los titulares son
+       nombres largos de organismos y empresas. Se carga un único peso (600) para los h1 y el
+       h2 del bloque principal; el texto, la interfaz y las tablas siguen en Inter.
+       Georgia va primero en el respaldo porque tiene una altura de x parecida y el salto al
+       cargar la fuente (font-display: swap) se nota menos. */
+    --font-serif: 'Newsreader', Georgia, 'Times New Roman', ui-serif, serif;
+
     --color-primary: #C8102E;
     --color-primary-dark: #A00D24;
     --color-neutral: #4A4A4A;
     --color-neutral-light: #F5F5F5;
+}
+
+/* De Newsreader sólo se carga el peso 600 (ver --font-serif). Sin esto, un font-bold en un
+   titular haría que el navegador fingiera la negrita engordando los trazos por software, que
+   es justo el defecto que delata una fuente mal cargada. */
+.font-serif {
+    font-synthesis-weight: none;
+}
+
+/* Cifras de ancho fijo en tablas y datos. El sitio es una sucesión de columnas de
+   importes: con dígitos de ancho variable las cifras se desalinean verticalmente y
+   comparar magnitudes de un vistazo cuesta más. No se aplica al texto corrido. */
+table,
+[data-cifras] {
+    font-variant-numeric: tabular-nums;
 }
 
 /* Foco visible global (WCAG 2.4.7 / 2.4.11): garantiza indicador de foco en

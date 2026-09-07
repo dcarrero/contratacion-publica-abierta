@@ -269,7 +269,14 @@ class SyncPaisVasco extends Command
 
             return is_array($data) ? $data : null;
         } finally {
-            ini_set('memory_limit', $previousLimit ?: '1G');
+            // Restaurar el límite puede fallar: PHP no permite bajar memory_limit por debajo
+            // del uso actual, y los JSON de años grandes (2019 ~128MB) dejan el uso en ~587MB,
+            // por encima del límite previo (512M). En ese caso se deja elevado — el comando
+            // termina pronto y libera todo. Antes esto abortaba el sync entero.
+            try {
+                @ini_set('memory_limit', $previousLimit ?: '1G');
+            } catch (\Throwable) {
+            }
         }
     }
 

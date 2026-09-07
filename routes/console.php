@@ -38,6 +38,14 @@ Schedule::command('placsp:sync-menores')
     ->withoutOverlapping()
     ->appendOutputTo($syncLog);
 
+// Feed vivo de plataformas agregadas (sindicación 1044: Cataluña, Euskadi, Andalucía,
+// Madrid, Galicia, Navarra, La Rioja). Es un canal disjunto del 643, por eso va además
+// de placsp:sync-licitaciones. PLACSP regenera el feed sobre las 03:00.
+Schedule::command('regional:sync-agregadas')
+    ->dailyAt('04:20')
+    ->withoutOverlapping()
+    ->appendOutputTo($syncLog);
+
 Schedule::command('regional:sync-mad')
     ->dailyAt('04:30')
     ->withoutOverlapping()
@@ -100,6 +108,16 @@ Schedule::command("regional:sync-ara --year={$currentYear}")
 
 Schedule::command('regional:sync-ast')
     ->weeklyOn(6, '03:00')  // Sábado 03:00
+    ->withoutOverlapping()
+    ->appendOutputTo($syncLog);
+
+// === Ayuntamiento de Madrid — contratos menores (mensual) ===
+// El portal declara periodicidad mensual (desfase real observado ~6 semanas), así que
+// no tiene sentido bajarlo a diario. Se reimportan el año en curso y el anterior: el
+// fichero del año N contiene contratos adjudicados en N-1 e inscritos en N.
+
+Schedule::command("regional:sync-mad-ayto --year={$currentYear} --year={$prevYear}")
+    ->monthlyOn(15, '02:30')
     ->withoutOverlapping()
     ->appendOutputTo($syncLog);
 

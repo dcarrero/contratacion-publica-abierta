@@ -321,10 +321,8 @@ function mapaApp() {
 
         formatImporte(n) {
             if (n == null) return '0 €';
-            if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.', ',') + ' B€';
-            if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.', ',') + ' M€';
-            if (n >= 1e3) return (n / 1e3).toFixed(0) + ' K€';
-            return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+            // Escala compartida con el resto del sitio (resources/js/app.js).
+            return window.formatImporteCorto(n);
         }
     };
 }

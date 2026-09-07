@@ -1,6 +1,6 @@
 <x-layouts.app title="Análisis — Contratación Abierta">
 
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">Análisis de la contratación pública</h1>
+    <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">Análisis de la contratación pública</h1>
 
     {{-- Sub-navegación --}}
     @include('analisis._subnav', ['active' => 'graficas'])
@@ -135,12 +135,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chartColors = ['#dc2626','#2563eb','#16a34a','#d97706','#7c3aed','#db2777','#0891b2','#65a30d','#ea580c','#6366f1'];
-    const fmt = v => {
-        if (v >= 1e9) return (v/1e9).toFixed(1) + ' MM€';
-        if (v >= 1e6) return (v/1e6).toFixed(1) + ' M€';
-        if (v >= 1e3) return (v/1e3).toFixed(0) + ' K€';
-        return v.toFixed(0) + ' €';
-    };
+    const fmt = window.formatImporteCorto;
 
     // 1. Evolución anual
     const evData = @json($charts['evolucion_anual']);

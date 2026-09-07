@@ -8,7 +8,7 @@
     <title>{{ $title ?? 'Contratación Abierta' }}</title>
     <meta name="description" content="{{ $metaDescription ?? 'Portal de transparencia en contratación pública de España. Contratos de administraciones públicas estatales, autonómicas y locales.' }}">
 
-    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="canonical" href="{{ $canonical ?? url()->current() }}">
 
     <meta property="og:title" content="{{ $title ?? 'Contratación Abierta' }}">
     <meta property="og:description" content="{{ $metaDescription ?? 'Portal de transparencia en contratación pública de España.' }}">
@@ -18,8 +18,17 @@
     <meta property="og:site_name" content="{{ config('contratacion.sitio.nombre', 'Contratación Abierta') }}">
     <meta name="twitter:card" content="summary">
 
+    {{-- Tipografía: Inter para texto e interfaz, Newsreader 600 sólo para titulares. Una única
+         petición de CSS para ambas familias y font-display:swap, para que el texto se lea desde
+         el primer pintado. El preconnect con crossorigin es el que abre de verdad la conexión de
+         los ficheros de fuente (el otro sólo sirve para la hoja de estilos).
+         Sólo se descarga el subconjunto latino de cada peso: los @font-face vienen partidos por
+         unicode-range, así que latin-ext, vietnamita y cirílico no llegan a pedirse. --}}
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="https://fonts.bunny.net/newsreader/files/newsreader-latin-600-normal.woff2">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700%7Cnewsreader:600&display=swap" rel="stylesheet">
 
     <link rel="alternate" type="application/rss+xml" title="Contratación Abierta — Últimos contratos" href="{{ route('rss.contratos') }}">
 
@@ -51,14 +60,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('dashboard') }}" class="font-bold text-lg sm:text-xl tracking-tight hover:opacity-90">
+                    <a href="{{ route('dashboard') }}" class="font-bold text-lg xl:text-xl tracking-tight whitespace-nowrap hover:opacity-90">
                         Contratación Abierta
                     </a>
-                    <span class="hidden sm:inline text-red-200 text-sm">España</span>
+                    <span class="hidden xl:inline text-red-200 text-sm">España</span>
                 </div>
 
                 {{-- Nav desktop --}}
-                <nav aria-label="Principal" class="hidden md:flex items-center gap-6 text-sm font-medium">
+                <nav aria-label="Principal" class="hidden lg:flex items-center gap-4 xl:gap-6 text-sm font-medium">
                     <a href="{{ route('dashboard') }}" class="hover:text-red-200 transition {{ request()->routeIs('dashboard') ? 'text-white underline underline-offset-4' : 'text-red-100' }}">
                         Inicio
                     </a>
@@ -93,7 +102,7 @@
                     x-data="{ open: false }"
                     x-on:click="open = !open; $dispatch('toggle-mobile-nav')"
                     type="button"
-                    class="md:hidden p-2 rounded hover:bg-primary-dark transition"
+                    class="lg:hidden p-2 rounded hover:bg-primary-dark transition"
                     aria-label="Menú"
                     aria-controls="mobile-nav"
                     x-bind:aria-expanded="open ? 'true' : 'false'"
@@ -114,7 +123,7 @@
             x-on:keydown.escape.window="open = false"
             x-show="open"
             x-transition
-            class="md:hidden border-t border-red-400"
+            class="lg:hidden border-t border-red-400"
         >
             <div class="px-4 py-3 space-y-2">
                 <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded hover:bg-primary-dark transition text-sm">Inicio</a>
@@ -142,7 +151,10 @@
                 <p>
                     Proyecto de transparencia ciudadana. No es una web oficial.
                 </p>
-                <p class="mt-2 sm:mt-0 flex gap-4">
+                <p class="mt-2 sm:mt-0 flex flex-wrap gap-4">
+                    <a href="{{ route('historico') }}" class="text-gray-300 hover:text-white underline">
+                        Datos históricos
+                    </a>
                     <a href="{{ route('sobre') }}" class="text-gray-300 hover:text-white underline">
                         Fuentes de datos
                     </a>

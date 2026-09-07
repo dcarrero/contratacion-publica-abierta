@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cbc="urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2" xmlns:cac-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2" xmlns:cbc-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonBasicComponents-2" xmlns:at="http://purl.org/atompub/tombstones/1.0">
+    <id>https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores_20260905_030029.atom</id>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores_20260905_030029.atom" rel="self"/>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom" rel="first"/>
+    <title>Plataformas Agregadas Sin Menores - Test Page 2</title>
+    <updated>2026-09-05T03:00:29.000+02:00</updated>
+    <!-- Entry 4: Euskadi -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/PlataformasAgregadasSinMenores/20306633</id>
+        <link href="https://www.contratacion.euskadi.eus/anuncio/9876"/>
+        <summary type="text">Id licitación: EJ-2026/22; Órgano de Contratación: Osakidetza; Importe: 80000 EUR; Estado: Publicada</summary>
+        <title>Suministro de material sanitario fungible</title>
+        <updated>2026-09-04T12:00:00.000+02:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>EJ-2026/22</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">PUB</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">Q4800001A</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Osakidetza - Servicio Vasco de Salud</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Suministro de material sanitario fungible</cbc:Name>
+                <cbc:TypeCode>1</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">80000</cbc:TaxExclusiveAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>33140000</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentityCode>ES213</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+    <!-- Entry 5: La Rioja -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/PlataformasAgregadasSinMenores/20306634</id>
+        <link href="https://www.larioja.org/contratacion/anuncio/555"/>
+        <summary type="text">Id licitación: LR-2026/3; Órgano de Contratación: Gobierno de La Rioja; Importe: 35000 EUR; Estado: Publicada</summary>
+        <title>Servicio de mantenimiento de zonas verdes</title>
+        <updated>2026-09-04T08:30:00.000+02:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>LR-2026/3</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">PUB</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">S2633001C</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Gobierno de La Rioja</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Servicio de mantenimiento de zonas verdes</cbc:Name>
+                <cbc:TypeCode>2</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">35000</cbc:TaxExclusiveAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>77310000</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentityCode>ES230</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+</feed>

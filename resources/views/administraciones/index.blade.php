@@ -1,6 +1,6 @@
 <x-layouts.app title="Administraciones — Contratación Abierta">
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Administraciones</h1>
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 tracking-tight leading-tight">Administraciones</h1>
         <p class="text-sm text-gray-500 mt-1">Comunidades autónomas y ciudades autónomas de España</p>
     </div>
 

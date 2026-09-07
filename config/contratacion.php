@@ -28,7 +28,11 @@ return [
     'placsp' => [
         'licitaciones_feed' => 'https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom',
         'menores_feed' => 'https://contrataciondelsectorpublico.gob.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes.atom',
-        'organos_feed' => 'https://contrataciondelsectorpublico.gob.es/sindicacion/sindicacion_1044/PlatasPerfilesContratantes.atom',
+        // Plataformas autonómicas y locales agregadas (Cataluña, Euskadi, Andalucía, Madrid,
+        // Galicia, Navarra, La Rioja). Es un canal DISJUNTO del feed 643: ningún organismo
+        // aparece en los dos. La URL anterior (PlatasPerfilesContratantes.atom) devolvía
+        // HTTP 200 con un HTML de error de certificado; estaba muerta.
+        'agregadas_feed' => 'https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom',
     ],
 
     /*
@@ -254,6 +258,17 @@ return [
         'madrid' => [
             'feed_url' => 'https://contratos-publicos.comunidad.madrid/feed/licitaciones2',
             'default_nuts' => 'ES30',
+        ],
+        // Ayuntamiento de Madrid: SOLO contratos menores (las licitaciones ya llegan
+        // por PLACSP). Las URLs de recurso no se pueden construir, se resuelven con
+        // la API CKAN del portal (package_show).
+        'madrid_ayuntamiento' => [
+            'ckan_package' => '300253-0-contratos-actividad-menores',
+            'dataset_url' => 'https://datos.madrid.es/dataset/300253-0-contratos-actividad-menores',
+            'nif' => 'P2807900B',
+            'dir3' => 'L01280796',
+            'default_nuts' => 'ES300',
+            'crawl_delay' => 10,
         ],
         'valencia' => [
             'default_nuts' => 'ES52',

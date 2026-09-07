@@ -1,7 +1,7 @@
 <x-layouts.app title="Sobre este proyecto — Contratación Abierta">
 
     <div class="max-w-3xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">Sobre este proyecto</h1>
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-6 tracking-tight leading-tight">Sobre este proyecto</h1>
 
         <div class="bg-white rounded-lg shadow p-6 sm:p-8 space-y-6 text-gray-700 leading-relaxed">
 

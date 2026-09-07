@@ -1,6 +1,6 @@
 <x-layouts.app title="Anomalías detectadas — Contratación Abierta">
 
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">Análisis de la contratación pública</h1>
+    <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">Análisis de la contratación pública</h1>
 
     {{-- Sub-navegación --}}
     @include('analisis._subnav', ['active' => 'anomalias'])

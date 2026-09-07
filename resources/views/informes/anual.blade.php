@@ -1,6 +1,6 @@
 <x-layouts.app title="Informe nacional {{ $year }} — Contratación Abierta">
 
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">Informe nacional {{ $year }}</h1>
+    <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">Informe nacional {{ $year }}</h1>
 
     @include('analisis._subnav', ['active' => 'informes'])
 

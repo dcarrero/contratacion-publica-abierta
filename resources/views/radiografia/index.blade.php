@@ -1,7 +1,7 @@
 <x-layouts.app title="Radiografía de la contratación pública por provincia — Contratación Abierta">
 
     <div class="max-w-5xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Radiografía por provincia</h1>
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">Radiografía por provincia</h1>
         <p class="text-gray-600 mb-4 max-w-3xl">
             ¿Cuánto dinero público se adjudica en tu provincia y a quién? Elige una provincia para ver el
             gasto contratado, el importe por habitante, los principales adjudicatarios y organismos, y su

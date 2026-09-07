@@ -54,6 +54,8 @@ class KpisControllerTest extends TestCase
             'url_placsp' => 'https://example.com',
             'organismo_id' => $organismoId,
             'adjudicatario_id' => $adjudicatarioId,
+            // La ficha se centra en un año: sin fecha, el contrato queda fuera de ella.
+            'fecha_publicacion' => date('Y').'-01-15',
             'importe_adjudicacion' => $importe,
             'es_menor' => $esMenor,
             'fuente_datos_id' => $fuenteId,
@@ -81,9 +83,9 @@ class KpisControllerTest extends TestCase
 
         $ficha = $response->viewData('ficha');
 
-        $this->assertSame(3, $ficha['kpis']['total_contratos']);
-        $this->assertEquals(600.00, (float) $ficha['kpis']['importe_total']);
-        $this->assertSame(2, $ficha['kpis']['adjudicatarios_distintos']);
+        $this->assertSame(3, $ficha['kpis']['contratos']);
+        $this->assertEquals(600.00, (float) $ficha['kpis']['importe']);
+        $this->assertSame(2, $ficha['kpis']['contrapartes']);
         // 2 menores out of 3 = 66.7%
         $this->assertEquals(66.7, $ficha['kpis']['pct_menores']);
     }
@@ -97,8 +99,9 @@ class KpisControllerTest extends TestCase
 
         $ficha = $response->viewData('ficha');
 
-        $this->assertSame(0, $ficha['kpis']['total_contratos']);
-        $this->assertSame(0, $ficha['kpis']['pct_menores']);
+        $this->assertSame(0, $ficha['kpis']['contratos']);
+        // pct_menores es siempre float, también cuando no hay contratos.
+        $this->assertSame(0.0, $ficha['kpis']['pct_menores']);
     }
 
     public function test_organismo_kpis_all_menores(): void
@@ -137,9 +140,9 @@ class KpisControllerTest extends TestCase
 
         $ficha = $response->viewData('ficha');
 
-        $this->assertSame(3, $ficha['kpis']['total_contratos']);
-        $this->assertEquals(800.00, (float) $ficha['kpis']['importe_total']);
-        $this->assertSame(2, $ficha['kpis']['organismos_distintos']);
+        $this->assertSame(3, $ficha['kpis']['contratos']);
+        $this->assertEquals(800.00, (float) $ficha['kpis']['importe']);
+        $this->assertSame(2, $ficha['kpis']['contrapartes']);
         $this->assertEquals(500.00, (float) $ficha['kpis']['contrato_mayor']);
     }
 
@@ -152,7 +155,7 @@ class KpisControllerTest extends TestCase
 
         $ficha = $response->viewData('ficha');
 
-        $this->assertSame(0, $ficha['kpis']['total_contratos']);
+        $this->assertSame(0, $ficha['kpis']['contratos']);
         $this->assertNull($ficha['kpis']['contrato_mayor']);
     }
 }

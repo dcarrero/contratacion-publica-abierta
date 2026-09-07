@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cbc="urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2" xmlns:cac-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2" xmlns:cbc-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonBasicComponents-2" xmlns:at="http://purl.org/atompub/tombstones/1.0">
+    <id>https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom</id>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom" rel="self"/>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom" rel="first"/>
+    <link href="https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores_20260905_030029.atom" rel="next"/>
+    <title>Plataformas Agregadas Sin Menores - Test Page 1</title>
+    <updated>2026-09-07T03:00:17.168+02:00</updated>
+    <!-- Tombstones: el feed real intercala licitaciones retiradas; no deben importarse -->
+    <at:deleted-entry ref="https://contrataciondelestado.es/sindicacion/PlataformasAgregadasSinMenores/8209702" when="2026-09-07T00:00:45.922+02:00">
+        <at:comment type="CERRADA"/>
+    </at:deleted-entry>
+    <at:deleted-entry ref="https://contrataciondelestado.es/sindicacion/PlataformasAgregadasSinMenores/7699512" when="2026-09-07T00:00:45.466+02:00">
+        <at:comment type="CERRADA"/>
+    </at:deleted-entry>
+    <!-- Entry 1: Navarra, órgano identificado por ID_OC_PLAT (no NIF) -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/PlataformasAgregadasSinMenores/20306630</id>
+        <link href="https://hacienda.navarra.es/sicpportal/mtoAnunciosModalidad.aspx?cod=2608190935446F356677"/>
+        <summary type="text">Id licitación: 8256_ABSU01-2026; Órgano de Contratación: Fundación Universidad-Sociedad; Importe: 9000,00 EUR; Estado: Evaluación</summary>
+        <title>Suministro equipos multifunción</title>
+        <updated>2026-09-07T01:00:06.673+02:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>8256_ABSU01-2026</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">EV</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="ID_OC_PLAT">G31603509</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Fundación Universidad-Sociedad</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Suministro equipos multifunción</cbc:Name>
+                <cbc:TypeCode>1</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:EstimatedOverallContractAmount currencyID="EUR">45000</cbc:EstimatedOverallContractAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">9000</cbc:TaxExclusiveAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>30000000</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentityCode>ES220</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+                <cac:TenderSubmissionDeadlinePeriod>
+                    <cbc:EndDate>2026-09-25</cbc:EndDate>
+                </cac:TenderSubmissionDeadlinePeriod>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+    <!-- Entry 2: Galicia con adjudicación -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/PlataformasAgregadasSinMenores/20306631</id>
+        <link href="https://www.contratosdegalicia.gal/resultado.jsp?N=123456"/>
+        <summary type="text">Id licitación: SER-2026/44; Órgano de Contratación: Concello de Santiago; Importe: 220000 EUR; Estado: Adjudicada</summary>
+        <title>Servicio de limpieza de dependencias municipales</title>
+        <updated>2026-09-06T18:20:00.000+02:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>SER-2026/44</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">ADJ</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">P1507900F</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Concello de Santiago de Compostela</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Servicio de limpieza de dependencias municipales</cbc:Name>
+                <cbc:TypeCode>2</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">220000</cbc:TaxExclusiveAmount>
+                    <cbc:TotalAmount currencyID="EUR">266200</cbc:TotalAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>90910000</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentity>A Coruña</cbc:CountrySubentity>
+                    <cbc:CountrySubentityCode>ES111</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+            </cac:TenderingProcess>
+            <cac-place-ext:TenderResult>
+                <cbc:ResultCode>1</cbc:ResultCode>
+                <cbc:AwardDate>2026-08-30</cbc:AwardDate>
+                <cbc:ReceivedTenderQuantity>4</cbc:ReceivedTenderQuantity>
+                <cac:WinningParty>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">B15999999</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Limpezas Compostela SL</cbc:Name>
+                    </cac:PartyName>
+                </cac:WinningParty>
+                <cac:AwardedTenderedProject>
+                    <cac:LegalMonetaryTotal>
+                        <cbc:PayableAmount currencyID="EUR">198000</cbc:PayableAmount>
+                        <cbc:TaxInclusiveAmount currencyID="EUR">239580</cbc:TaxInclusiveAmount>
+                    </cac:LegalMonetaryTotal>
+                </cac:AwardedTenderedProject>
+            </cac-place-ext:TenderResult>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+    <!-- Entry 3: Catalunya -->
+    <entry>
+        <id>https://contrataciondelestado.es/sindicacion/PlataformasAgregadasSinMenores/20306632</id>
+        <link href="https://contractaciopublica.cat/ca/detall-publicacio/1234"/>
+        <summary type="text">Id licitación: OBR-2026/7; Órgano de Contratación: Ajuntament de Girona; Importe: 500000 EUR; Estado: Publicada</summary>
+        <title>Obras de reurbanización de la calle Nou</title>
+        <updated>2026-09-06T09:15:00.000+02:00</updated>
+        <cac-place-ext:ContractFolderStatus>
+            <cbc:ContractFolderID>OBR-2026/7</cbc:ContractFolderID>
+            <cbc-place-ext:ContractFolderStatusCode languageID="es">PUB</cbc-place-ext:ContractFolderStatusCode>
+            <cac-place-ext:LocatedContractingParty>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeName="NIF">P1708500B</cbc:ID>
+                    </cac:PartyIdentification>
+                    <cac:PartyName>
+                        <cbc:Name>Ajuntament de Girona</cbc:Name>
+                    </cac:PartyName>
+                </cac:Party>
+            </cac-place-ext:LocatedContractingParty>
+            <cac:ProcurementProject>
+                <cbc:Name>Obras de reurbanización de la calle Nou</cbc:Name>
+                <cbc:TypeCode>3</cbc:TypeCode>
+                <cac:BudgetAmount>
+                    <cbc:TaxExclusiveAmount currencyID="EUR">500000</cbc:TaxExclusiveAmount>
+                </cac:BudgetAmount>
+                <cac:RequiredCommodityClassification>
+                    <cbc:ItemClassificationCode>45233252</cbc:ItemClassificationCode>
+                </cac:RequiredCommodityClassification>
+                <cac:RealizedLocation>
+                    <cbc:CountrySubentityCode>ES512</cbc:CountrySubentityCode>
+                </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:TenderingProcess>
+                <cbc:ProcedureCode>1</cbc:ProcedureCode>
+                <cac:TenderSubmissionDeadlinePeriod>
+                    <cbc:EndDate>2026-10-01</cbc:EndDate>
+                </cac:TenderSubmissionDeadlinePeriod>
+            </cac:TenderingProcess>
+        </cac-place-ext:ContractFolderStatus>
+    </entry>
+</feed>

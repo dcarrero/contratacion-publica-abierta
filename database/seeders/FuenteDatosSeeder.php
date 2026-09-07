@@ -101,6 +101,17 @@ class FuenteDatosSeeder extends Seeder
                 'activo' => true,
             ],
             [
+                // Contratos menores del Ayuntamiento de Madrid. Hueco de cobertura real:
+                // sus licitaciones sí están en PLACSP, pero los menores no aparecen en
+                // ninguna sindicación (sólo ~3.400 de ~71.500).
+                'nombre' => 'Ayuntamiento de Madrid - Contratos Menores',
+                'slug' => 'mad-ayto-menores',
+                'url' => 'https://datos.madrid.es/dataset/300253-0-contratos-actividad-menores',
+                'tipo' => 'csv',
+                'frecuencia' => 'mensual',
+                'activo' => true,
+            ],
+            [
                 'nombre' => 'Comunitat Valenciana - Contratación',
                 'slug' => 'val-contratos',
                 'url' => 'https://dadesobertes.gva.es/',

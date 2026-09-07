@@ -1,6 +1,6 @@
 <x-layouts.app title="Rankings — Contratación Abierta">
 
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">Análisis de la contratación pública</h1>
+    <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">Análisis de la contratación pública</h1>
 
     {{-- Sub-navegación --}}
     @include('analisis._subnav', ['active' => 'rankings'])
@@ -229,12 +229,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const fmt = v => {
-        if (v >= 1e9) return (v/1e9).toFixed(1) + ' MM€';
-        if (v >= 1e6) return (v/1e6).toFixed(1) + ' M€';
-        if (v >= 1e3) return (v/1e3).toFixed(0) + ' K€';
-        return v.toFixed(0) + ' €';
-    };
+    const fmt = window.formatImporteCorto;
 
     // 1. Comparativa CCAA — horizontal bar: % menores + línea media ofertas
     const ccaaData = @json($rankings['comparativa_ccaa']);

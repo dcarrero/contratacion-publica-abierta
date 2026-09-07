@@ -20,7 +20,7 @@
             <span class="text-gray-900">{{ $provincia->nombre }}</span>
         </nav>
 
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-1 tracking-tight leading-tight">
             Radiografía de {{ $provincia->nombre }}@if($year) <span class="text-primary">{{ $year }}</span>@endif
         </h1>
         <p class="text-gray-500 mb-4">
@@ -220,7 +220,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const evData = @json(array_values($data['evolucion_anual']));
-        const fmt = v => v >= 1e9 ? (v / 1e9).toFixed(1) + ' MM€' : v >= 1e6 ? (v / 1e6).toFixed(1) + ' M€' : v >= 1e3 ? (v / 1e3).toFixed(0) + ' K€' : v + ' €';
+        const fmt = window.formatImporteCorto;
         new Chart(document.getElementById('radChartEvolucion'), {
             data: {
                 labels: evData.map(d => d.year),

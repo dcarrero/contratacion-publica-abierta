@@ -28,7 +28,8 @@ use App\Http\Controllers\RssController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', DashboardController::class)->name('dashboard');
+Route::get('/', [DashboardController::class, '__invoke'])->name('dashboard');
+Route::get('/historico', [DashboardController::class, 'historico'])->name('historico');
 Route::get('/contratos', [ContratoController::class, 'index'])->name('contratos.index');
 Route::get('/contratos/{contrato:placsp_id}', [ContratoController::class, 'show'])->where('contrato', '.*')->name('contratos.show');
 Route::get('/mapa', MapaController::class)->name('mapa');
@@ -37,10 +38,26 @@ Route::get('/api/mapa/provincias', [MapaApiController::class, 'provincias'])->na
 Route::get('/analisis', AnalisisController::class)->name('analisis');
 Route::get('/administraciones', [AdministracionController::class, 'index'])->name('administraciones.index');
 Route::get('/administraciones/{comunidad:nuts}', [AdministracionController::class, 'show'])->name('administraciones.show');
+Route::get('/administraciones/{comunidad:nuts}/historico', [AdministracionController::class, 'historico'])->name('administraciones.historico');
+Route::get('/administraciones/{comunidad:nuts}/{year}', [AdministracionController::class, 'show'])
+    ->whereNumber('year')
+    ->name('administraciones.anio');
 Route::get('/organismos', [OrganismoController::class, 'index'])->name('organismos.index');
 Route::get('/organismos/{organismo:nif}', [OrganismoController::class, 'show'])->name('organismos.show');
+Route::get('/organismos/{organismo:nif}/historico', [OrganismoController::class, 'historico'])->name('organismos.historico');
+Route::get('/organismos/{organismo:nif}/red', [OrganismoController::class, 'red'])->name('organismos.red');
+Route::get('/organismos/{organismo:nif}/{year}', [OrganismoController::class, 'show'])
+    ->whereNumber('year')
+    ->name('organismos.anio');
 Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.index');
 Route::get('/empresas/{adjudicatario:nif}', [EmpresaController::class, 'show'])->name('empresas.show');
+Route::get('/empresas/{adjudicatario:nif}/historico', [EmpresaController::class, 'historico'])->name('empresas.historico');
+Route::get('/empresas/{adjudicatario:nif}/red', [EmpresaController::class, 'red'])->name('empresas.red');
+// Año en la ruta (SEO: /empresas/B33490426/2024), como en /radiografia/{slug}/{year}.
+// whereNumber evita colisionar con 'historico' y con informe.pdf.
+Route::get('/empresas/{adjudicatario:nif}/{year}', [EmpresaController::class, 'show'])
+    ->whereNumber('year')
+    ->name('empresas.anio');
 // La ruta /empresas/{nif}/informe.pdf vive en el módulo privado app/Informes (no público).
 Route::get('/radiografia', [RadiografiaController::class, 'index'])->name('radiografia.index');
 // {year?} en la ruta (SEO: /radiografia/cadiz/2025) en vez de ?year=. whereNumber evita colisiones.

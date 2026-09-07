@@ -2,7 +2,7 @@
     metaDescription="Compara la contratación pública de dos provincias españolas lado a lado: gasto, importe por habitante, sectores y principales adjudicatarios.">
 
     <div class="max-w-3xl mx-auto" x-data="{ a: '', b: '' }">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Comparar provincias</h1>
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">Comparar provincias</h1>
         <p class="text-gray-600 mb-8">
             Elige dos provincias para comparar su contratación pública lado a lado: gasto total,
             importe por habitante, % de contratos menores y principales adjudicatarios.

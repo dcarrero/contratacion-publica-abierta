@@ -1,7 +1,7 @@
 <x-layouts.app title="Aviso Legal — Contratación Abierta">
 
     <div class="max-w-3xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">Aviso Legal</h1>
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-6 tracking-tight leading-tight">Aviso Legal</h1>
 
         <div class="bg-white rounded-lg shadow p-6 sm:p-8 space-y-10 text-gray-700 leading-relaxed">
 

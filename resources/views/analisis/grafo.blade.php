@@ -1,6 +1,6 @@
 <x-layouts.app title="Red de relaciones — Contratación Abierta" :fullWidth="true">
 
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">Análisis de la contratación pública</h1>
+    <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2 tracking-tight leading-tight">Análisis de la contratación pública</h1>
 
     @include('analisis._subnav', ['active' => 'grafo'])
 
@@ -64,12 +64,8 @@
 
     let simulation = null;
 
-    function formatImporte(amount) {
-        if (amount >= 1e9) return (amount / 1e9).toFixed(1).replace('.', ',') + ' Md€';
-        if (amount >= 1e6) return (amount / 1e6).toFixed(1).replace('.', ',') + ' M€';
-        if (amount >= 1e3) return (amount / 1e3).toFixed(1).replace('.', ',') + ' K€';
-        return Math.round(amount).toLocaleString('es-ES') + ' €';
-    }
+    // Escala compartida con el resto del sitio (resources/js/app.js).
+    const formatImporte = window.formatImporteCorto;
 
     function loadGrafo(ccaa) {
         loading.style.display = 'flex';

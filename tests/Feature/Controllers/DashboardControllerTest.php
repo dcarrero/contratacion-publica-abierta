@@ -9,6 +9,7 @@ use App\Models\Contrato;
 use App\Models\FuenteDatos;
 use App\Models\Organismo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,9 @@ class DashboardControllerTest extends TestCase
     {
         parent::setUp();
         $this->withoutVite();
+        // La portada lee la serie nacional y los rankings que deja `stats:recalculate`:
+        // sin el fake, los tests leerían los JSON reales del entorno de desarrollo.
+        Storage::fake('local');
     }
 
     public function test_dashboard_sin_datos_devuelve_200(): void
@@ -76,16 +80,93 @@ class DashboardControllerTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertViewHas('kpis');
+        $response->assertViewHas('serie');
+        $response->assertViewHas('comparativa');
         $response->assertViewHas('topEmpresas');
         $response->assertViewHas('topOrganismos');
         $response->assertViewHas('ultimosContratos');
 
-        $kpis = $response->viewData('kpis');
-        // total_contratos se suma desde Organismo::sum('total_contratos')
-        $this->assertSame(5, (int) $kpis['total_contratos']);
-        $this->assertSame(1, (int) $kpis['total_organismos']);
-        $this->assertSame(1, (int) $kpis['total_adjudicatarios']);
+        // La portada titula con el año mostrado; los acumulados pasan a ser contexto.
+        $this->assertSame(2024, $response->viewData('anio'));
+        $this->assertSame(['num' => 1, 'importe' => 10000.0], $response->viewData('totalAnio'));
+
+        $totales = $response->viewData('totalesHistoricos');
+        $this->assertSame(5, $totales['contratos']);
+        $this->assertSame(1, $totales['organismos']);
+        $this->assertSame(1, $totales['adjudicatarios']);
+    }
+
+    public function test_dashboard_muestra_el_anio_en_curso_con_comparativa(): void
+    {
+        $anio = (int) date('Y');
+
+        $fuente = FuenteDatos::create([
+            'nombre' => 'Test Fuente YTD',
+            'slug' => 'test-fuente-ytd',
+            'tipo' => 'atom',
+            'activo' => true,
+        ]);
+        $organismo = Organismo::create(['nif' => 'P0000012C', 'nombre' => 'Organismo YTD']);
+
+        foreach ([[$anio.'-01-10', 1000.0], [($anio - 1).'-01-10', 500.0]] as $i => [$fecha, $importe]) {
+            Contrato::create([
+                'placsp_id' => 'DASH-YTD-'.$i,
+                'url_placsp' => 'https://example.com/ytd'.$i,
+                'organismo_id' => $organismo->id,
+                'fuente_datos_id' => $fuente->id,
+                'version' => 1,
+                'fecha_publicacion' => $fecha,
+                'importe_adjudicacion' => $importe,
+            ]);
+        }
+
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $this->assertSame($anio, $response->viewData('anio'));
+        $this->assertSame(['num' => 1, 'importe' => 1000.0], $response->viewData('totalAnio'));
+
+        // Enero está cerrado salvo en enero, cuando la comparativa cae al año anterior.
+        $comparativa = $response->viewData('comparativa');
+        $this->assertContains($comparativa['anio'], [$anio, $anio - 1]);
+    }
+
+    public function test_historico_nacional_devuelve_200(): void
+    {
+        $fuente = FuenteDatos::create([
+            'nombre' => 'Test Fuente Hist',
+            'slug' => 'test-fuente-hist',
+            'tipo' => 'atom',
+            'activo' => true,
+        ]);
+        $organismo = Organismo::create(['nif' => 'P0000013D', 'nombre' => 'Organismo Hist']);
+
+        foreach (['2021-02-01' => 100.0, '2022-02-01' => 300.0] as $fecha => $importe) {
+            Contrato::create([
+                'placsp_id' => 'DASH-H-'.$fecha,
+                'url_placsp' => 'https://example.com/h'.$fecha,
+                'organismo_id' => $organismo->id,
+                'fuente_datos_id' => $fuente->id,
+                'version' => 1,
+                'fecha_publicacion' => $fecha,
+                'importe_adjudicacion' => $importe,
+            ]);
+        }
+
+        $response = $this->get('/historico');
+
+        $response->assertStatus(200);
+        $response->assertViewIs('historico');
+        $this->assertCount(2, $response->viewData('anios'));
+        $this->assertSame(2022, $response->viewData('anios')[0]['anio']);
+        $this->assertCount(2, $response->viewData('matriz')['filas']);
+    }
+
+    public function test_historico_nacional_sin_datos_no_rompe(): void
+    {
+        $this->get('/historico')
+            ->assertStatus(200)
+            ->assertSee('Sin datos históricos');
     }
 
     public function test_dashboard_ultimos_contratos_solo_con_fecha_publicacion(): void

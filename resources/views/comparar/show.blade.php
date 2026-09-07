@@ -38,7 +38,7 @@
             <span class="text-gray-900">{{ $pa->nombre }} vs {{ $pb->nombre }}</span>
         </nav>
 
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-6 tracking-tight leading-tight">
             {{ $pa->nombre }} <span class="text-gray-500">vs</span> {{ $pb->nombre }}
         </h1>
 
