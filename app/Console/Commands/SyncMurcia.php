@@ -34,7 +34,7 @@ class SyncMurcia extends RegionalSyncCommand
      */
     private const BASE_URL_MENOR = 'https://datosabiertos.carm.es/odata/Hacienda/CONTRA_ContratosMenores_';
 
-    private const AVAILABLE_YEARS_MAYOR = [2019, 2020, 2021, 2022, 2023];
+    private const AVAILABLE_YEARS_MAYOR = [2019, 2020, 2021, 2022, 2023, 2024];
 
     private const AVAILABLE_YEARS_MENOR = [2022, 2023, 2024, 2025];
 

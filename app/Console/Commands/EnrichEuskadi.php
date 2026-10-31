@@ -20,6 +20,9 @@ class EnrichEuskadi extends Command
 
     protected $description = 'Enriquece contratos de Euskadi con datos del XML detallado (importes, adjudicatario, CPV)';
 
+    /** Identificadores por consulta al buscar qué contratos faltan por enriquecer. */
+    private const LOOKUP_CHUNK = 5000;
+
     private int $enriched = 0;
 
     private int $skipped = 0;
@@ -98,20 +101,26 @@ class EnrichEuskadi extends Command
             $this->info('  '.count($xmlMap).' registros con URL XML');
 
             // Filtrar: solo contratos que existen en BD y necesitan enriquecimiento
-            $placspIds = array_keys($xmlMap);
-            $needEnrichment = Contrato::whereIn('placsp_id', $placspIds)
-                ->where(function ($q) {
-                    $q->whereNull('importe_adjudicacion')
-                        ->orWhere(function ($q2) {
-                            $q2->whereNull('nif_adjudicatario')
-                                ->orWhere('nif_adjudicatario', 'like', 'EUSK-%');
-                        })
-                        ->orWhereNull('tipo_contrato')
-                        ->orWhereNull('procedimiento')
-                        ->orWhereNull('cpv');
-                })
-                ->pluck('placsp_id')
-                ->all();
+            // Por tandas: PostgreSQL admite como mucho 65.535 parámetros por consulta, y el
+            // año en curso de Euskadi ya los supera. Con un único whereIn el comando falló
+            // todos los miércoles de octubre de 2026.
+            $needEnrichment = [];
+            foreach (array_chunk(array_keys($xmlMap), self::LOOKUP_CHUNK) as $placspIds) {
+                $encontrados = Contrato::whereIn('placsp_id', $placspIds)
+                    ->where(function ($q) {
+                        $q->whereNull('importe_adjudicacion')
+                            ->orWhere(function ($q2) {
+                                $q2->whereNull('nif_adjudicatario')
+                                    ->orWhere('nif_adjudicatario', 'like', 'EUSK-%');
+                            })
+                            ->orWhereNull('tipo_contrato')
+                            ->orWhereNull('procedimiento')
+                            ->orWhereNull('cpv');
+                    })
+                    ->pluck('placsp_id')
+                    ->all();
+                array_push($needEnrichment, ...$encontrados);
+            }
 
             // Filtrar xmlMap solo a los que necesitan enriquecimiento
             $toProcess = [];

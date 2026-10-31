@@ -82,8 +82,12 @@ class SyncCastillaYLeon extends Command
                 continue;
             }
 
-            $this->importCsvFile($tempFile, $importer, $fuenteDatosId, $dryRun);
-            @unlink($tempFile);
+            // finally: si la importación revienta, el temporal (45 MB) no se queda en storage.
+            try {
+                $this->importCsvFile($tempFile, $importer, $fuenteDatosId, $dryRun);
+            } finally {
+                @unlink($tempFile);
+            }
         }
 
         $duration = (int) (microtime(true) - $startTime);
@@ -166,11 +170,19 @@ class SyncCastillaYLeon extends Command
         $limit = (int) $this->option('limit');
         $parser = new CastillaYLeonParser;
 
-        $reader = Reader::createFromPath($file, 'r');
-        $reader->addStreamFilter('convert.iconv.UTF-8/UTF-8//IGNORE');
+        // Sin filtro iconv: convert.iconv trabaja por bloques del stream y, con el iconv de
+        // glibc, salta con "invalid multibyte sequence" cuando un carácter de varios bytes
+        // queda partido entre dos bloques, aunque el fichero sea UTF-8 válido. Así se cayó
+        // la sync semanal de octubre de 2026. Los bytes inválidos reales se limpian campo a
+        // campo con mb_scrub al leer cada registro.
+        $reader = Reader::from($file, 'r');
         $reader->setHeaderOffset(0);
 
-        $firstLine = fgets(fopen($file, 'r'));
+        $handle = fopen($file, 'r');
+        $firstLine = $handle !== false ? fgets($handle) : false;
+        if ($handle !== false) {
+            fclose($handle);
+        }
         if ($firstLine !== false) {
             if (str_contains($firstLine, '|')) {
                 $reader->setDelimiter('|');
@@ -199,7 +211,10 @@ class SyncCastillaYLeon extends Command
                 break;
             }
 
-            $chunk[] = $record;
+            $chunk[] = array_map(
+                fn ($value) => is_string($value) ? mb_scrub($value, 'UTF-8') : $value,
+                $record,
+            );
 
             if (count($chunk) >= $chunkSize) {
                 $this->processChunk($chunk, $parser, $importer, $fuenteDatosId, $dryRun);

@@ -8,6 +8,7 @@ use App\Console\Commands\Support\RegionalSyncCommand;
 use App\Models\FuenteDatos;
 use App\Services\ContratoImporter;
 use App\Services\Regional\ValenciaParser;
+use Illuminate\Support\Facades\Http;
 use League\Csv\Reader;
 
 class SyncValencia extends RegionalSyncCommand
@@ -22,7 +23,9 @@ class SyncValencia extends RegionalSyncCommand
     protected $description = 'Importa contratos desde CSV de datos abiertos de la Comunitat Valenciana';
 
     /**
-     * Resource IDs por año en dadesobertes.gva.es
+     * Resource IDs por año en dadesobertes.gva.es. Solo de respaldo: el ID se pide primero
+     * a la API de CKAN (resolveResourceId), porque GVA abre un dataset nuevo cada año y con
+     * la tabla fija 2026 se quedó sin importar hasta octubre.
      */
     private const RESOURCE_IDS = [
         2018 => '89414f44-374c-403f-82ef-53cd160317a7',
@@ -33,7 +36,10 @@ class SyncValencia extends RegionalSyncCommand
         2023 => 'a8b3aae7-ecb9-4508-80a6-c764805958a0',
         2024 => '69879ad2-ee19-426d-ad29-d1e5abe71c67',
         2025 => 'eb94c040-e7c0-4793-b921-144d2342d531',
+        2026 => '6b244ece-3ced-459f-a2a6-5cc4bfccd577',
     ];
+
+    private const CKAN_PACKAGE_URL = 'https://dadesobertes.gva.es/api/3/action/package_show';
 
     private const BASE_URL = 'https://dadesobertes.gva.es/datastore/dump';
 
@@ -61,8 +67,9 @@ class SyncValencia extends RegionalSyncCommand
         }
 
         foreach ($years as $year) {
-            if (! isset(self::RESOURCE_IDS[$year])) {
-                $this->warn("No hay resource ID para el año {$year}. Años disponibles: ".implode(', ', array_keys(self::RESOURCE_IDS)));
+            $resource = $this->resolveResource($year);
+            if ($resource === null) {
+                $this->warn("No se encuentra el dataset de contratos de {$year} en dadesobertes.gva.es.");
 
                 continue;
             }
@@ -70,7 +77,13 @@ class SyncValencia extends RegionalSyncCommand
             $this->newLine();
             $this->info("=== Año {$year} ===");
 
-            $tempFile = $this->downloadCsv($year);
+            // Primero el fichero estático (26 MB en segundos); el volcado del datastore va
+            // tan lento que en 2026 no terminó en 10 minutos. Queda como respaldo.
+            $dumpUrl = self::BASE_URL.'/'.$resource['id'];
+            $tempFile = $resource['url'] !== null ? $this->downloadCsv($year, $resource['url']) : null;
+            if ($tempFile === null) {
+                $tempFile = $this->downloadCsv($year, $dumpUrl);
+            }
             if ($tempFile === null) {
                 continue;
             }
@@ -112,10 +125,44 @@ class SyncValencia extends RegionalSyncCommand
         return self::SUCCESS;
     }
 
-    private function downloadCsv(int $year): ?string
+    /**
+     * Busca en CKAN el recurso CSV del dataset eco-gvo-contratos-{año}: su ID y la URL de
+     * descarga directa. Si la API no responde, recurre a la tabla fija (solo ID).
+     *
+     * @return array{id: string, url: ?string}|null
+     */
+    private function resolveResource(int $year): ?array
     {
-        $resourceId = self::RESOURCE_IDS[$year];
-        $url = self::BASE_URL.'/'.$resourceId;
+        try {
+            $response = Http::timeout(30)
+                ->withUserAgent('ContratacionAbierta/2.0 (transparencia)')
+                ->get(self::CKAN_PACKAGE_URL, ['id' => "eco-gvo-contratos-{$year}"]);
+
+            if ($response->successful() && $response->json('success') === true) {
+                foreach ((array) $response->json('result.resources', []) as $resource) {
+                    if (strtoupper((string) ($resource['format'] ?? '')) === 'CSV'
+                        && ($resource['datastore_active'] ?? false)
+                        && ! empty($resource['id'])) {
+                        $url = (string) ($resource['url'] ?? '');
+
+                        return [
+                            'id' => (string) $resource['id'],
+                            'url' => str_starts_with($url, 'https://') ? $url : null,
+                        ];
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->warn("  CKAN no responde ({$e->getMessage()}); se usa la tabla de respaldo.");
+        }
+
+        return isset(self::RESOURCE_IDS[$year])
+            ? ['id' => self::RESOURCE_IDS[$year], 'url' => null]
+            : null;
+    }
+
+    private function downloadCsv(int $year, string $url): ?string
+    {
 
         $tempFile = storage_path("app/val_temp_{$year}.csv");
         $this->line("Descargando año {$year}...");

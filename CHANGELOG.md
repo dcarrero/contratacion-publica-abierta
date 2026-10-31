@@ -3,6 +3,26 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.9.2] - 2026-10-31
+
+### Añadido
+
+- **Región de Murcia en el scheduler**: sincronización semanal (sábados) de los tres últimos
+  ejercicios. Los años que la CARM aún no ha publicado se saltan sin error.
+
+### Corregido
+
+- **Castilla y León**: la sync fallaba con "invalid multibyte sequence" aunque el CSV fuese
+  UTF-8 válido. El filtro `convert.iconv` del stream parte los caracteres acentuados entre
+  bloques con el iconv de glibc; ahora se lee sin filtro y cada campo pasa por `mb_scrub`.
+- **Comunitat Valenciana**: el año en curso no se importaba porque los identificadores de
+  recurso estaban fijados hasta 2025. Ahora se obtienen de la API de CKAN y se descarga el
+  CSV estático, mucho más rápido que el volcado del datastore. También se sincroniza el año
+  anterior.
+- **Euskadi**: el enriquecimiento con el XML de detalle superaba el límite de 65.535
+  parámetros de PostgreSQL y fallaba; ahora consulta por tandas. Además, los XML en
+  ISO-8859-1 se convierten a UTF-8 antes de extraer los campos.
+
 ## [1.9.1] - 2026-10-31
 
 ### Añadido

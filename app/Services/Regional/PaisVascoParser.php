@@ -93,6 +93,8 @@ class PaisVascoParser
      */
     public function parseXmlDetail(string $xml): array
     {
+        $xml = $this->toUtf8($xml);
+
         // Detectar formato por presencia de tag raíz
         if (str_contains($xml, '<contractingAnnouncement') || str_contains($xml, '<tenderBudgetWithoutTaxes')) {
             return $this->parseXmlDetailNew($xml);
@@ -103,6 +105,30 @@ class PaisVascoParser
         }
 
         return [];
+    }
+
+    /**
+     * Parte de los XML de detalle llegan en ISO-8859-1 y aquí se extraen con expresiones
+     * regulares, sin parser XML que convierta la codificación. Sin esto, «13 Días» llegaba
+     * a PostgreSQL como bytes Latin-1 y el UPDATE fallaba con "invalid byte sequence".
+     */
+    private function toUtf8(string $xml): string
+    {
+        if (mb_check_encoding($xml, 'UTF-8')) {
+            return $xml;
+        }
+
+        $declarada = preg_match('/<\?xml[^>]*encoding=["\']([^"\']+)["\']/i', $xml, $m) === 1
+            ? strtoupper($m[1])
+            : '';
+
+        // Windows-1252 es superconjunto práctico de ISO-8859-1 y el caso habitual cuando la
+        // cabecera dice UTF-8 pero el contenido no lo es.
+        $origen = in_array($declarada, mb_list_encodings(), true) && ! in_array($declarada, ['UTF-8', 'UTF8'], true)
+            ? $declarada
+            : 'Windows-1252';
+
+        return mb_convert_encoding($xml, 'UTF-8', $origen);
     }
 
     /**

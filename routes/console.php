@@ -91,7 +91,9 @@ Schedule::command("regional:sync-anda --year={$currentYear} --year={$prevYear}")
     ->withoutOverlapping()
     ->appendOutputTo($syncLog);
 
-Schedule::command("regional:sync-val --year={$currentYear}")
+// Año actual + anterior: GVA sigue completando el fichero del año pasado durante meses
+// (el de 2025 se actualizó en septiembre de 2026).
+Schedule::command("regional:sync-val --year={$currentYear} --year={$prevYear}")
     ->weeklyOn(5, '03:00')  // Viernes 03:00
     ->withoutOverlapping()
     ->appendOutputTo($syncLog);
@@ -108,6 +110,15 @@ Schedule::command("regional:sync-ara --year={$currentYear}")
 
 Schedule::command('regional:sync-ast')
     ->weeklyOn(6, '03:00')  // Sábado 03:00
+    ->withoutOverlapping()
+    ->appendOutputTo($syncLog);
+
+// Región de Murcia (CARM): publica un CSV por año y con retraso; los contratos mayores
+// suelen llegar más de un año tarde. Se piden los tres últimos ejercicios y los que aún no
+// existen (404) se saltan sin error. Hasta octubre de 2026 no estaba programada y solo se
+// había importado a mano.
+Schedule::command('regional:sync-mur --tipo=all --year='.($currentYear - 2)." --year={$prevYear} --year={$currentYear}")
+    ->weeklyOn(6, '04:00')  // Sábado 04:00
     ->withoutOverlapping()
     ->appendOutputTo($syncLog);
 
