@@ -1,6 +1,10 @@
 services:
   app:
     build: ./docker
+    # Imagen con nombre compartida con scheduler: si cada servicio construye la suya, una
+    # puede quedarse vieja. Pasó en 2026-09: el scheduler se quedó sin pg_dump y db:backup
+    # falló a diario durante semanas sin que nadie lo viera.
+    image: contratacion-clm-php:latest
     ports:
       - "8080:80"
       - "8443:443"
@@ -8,6 +12,34 @@ services:
       - .:/app
     env_file: .env.docker
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Ejecuta las tareas de routes/console.php (sincronizaciones diarias y semanales,
+  # recálculo de estadísticas, alertas). Sin este servicio nada se lanza solo: los ZIP de
+  # PLACSP estuvieron seis meses sin importarse justo por eso, y el portal acabó publicando
+  # una caída de contratación que no existía.
+  #
+  # schedule:work es un proceso en primer plano que despierta cada minuto, así que no hace
+  # falta cron dentro del contenedor.
+  scheduler:
+    build: ./docker
+    image: contratacion-clm-php:latest
+    volumes:
+      - .:/app
+    env_file: .env.docker
+    restart: unless-stopped
+    # Sobrescribe el entrypoint de FrankenPHP: este contenedor no sirve HTTP.
+    entrypoint: ["php", "artisan", "schedule:work"]
+    # Acotado a 2 GB (el memory_limit de PHP es 1 GB): un import de ZIP grande que se
+    # desmadre muere aquí en vez de dejar sin memoria al host, como ya ocurrió una vez.
+    mem_limit: 2g
+    # La imagen de FrankenPHP trae un healthcheck que consulta el endpoint de métricas de
+    # Caddy. Aquí no hay servidor HTTP, así que quedaría "unhealthy" para siempre; si el
+    # proceso muere, lo levanta restart: unless-stopped.
+    healthcheck:
+      disable: true
     depends_on:
       postgres:
         condition: service_healthy

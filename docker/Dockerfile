@@ -12,6 +12,18 @@ RUN install-php-extensions \
     pcntl \
     opcache
 
+# Cliente de PostgreSQL 17 para las copias de seguridad (db:backup).
+# Del repositorio oficial PGDG: el de Debian trae una versión anterior y pg_dump se niega
+# a volcar de un servidor más nuevo que él.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gnupg lsb-release \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
+    && sed -i 's|deb http|deb [signed-by=/usr/share/keyrings/postgresql.gpg] http|' /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-17 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

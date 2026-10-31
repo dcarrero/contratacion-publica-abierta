@@ -40,6 +40,23 @@ return [
     | Tipos de contrato (CODICE)
     |--------------------------------------------------------------------------
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Año desde el que la cobertura es completa
+    |--------------------------------------------------------------------------
+    |
+    | La Ley 9/2017 de Contratos del Sector Público, en vigor desde el 9 de marzo de 2018,
+    | obligó a publicar en PLACSP. El salto en los datos es inequívoco: de 47.721 contratos
+    | y 1.922 organismos en 2017 se pasa a 256.089 y 6.845 en 2018 (x5,4 y x3,6). Todo lo
+    | anterior suma el 1,4% del total y procede de unas pocas fuentes tempranas.
+    |
+    | Las vistas de histórico muestran desplegado desde este año y colapsan lo anterior: los
+    | datos siguen accesibles, pero no distorsionan la lectura ni sugieren una caída de
+    | actividad donde solo hay ausencia de obligación de publicar.
+    |
+    */
+    'anio_cobertura_completa' => 2018,
+
     'tipos_contrato' => [
         1 => 'Suministros',
         2 => 'Servicios',

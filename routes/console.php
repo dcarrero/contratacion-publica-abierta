@@ -146,6 +146,14 @@ Schedule::command('radiografia:warm --years')
     ->runInBackground()
     ->appendOutputTo($syncLog);
 
+// === Copia de seguridad (diaria, tras el recálculo de estadísticas) ===
+// A las 08:15, cuando ya han pasado las sincronizaciones (04:00-04:30), stats (07:00) y
+// las alertas (07:30): así la copia refleja el día completo. Conserva las 2 últimas.
+Schedule::command('db:backup --keep=2')
+    ->dailyAt('08:15')
+    ->withoutOverlapping()
+    ->appendOutputTo($syncLog);
+
 // === Anomalías y alertas ===
 
 Schedule::command('anomalias:detectar')

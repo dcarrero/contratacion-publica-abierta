@@ -3,6 +3,31 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.9.1] - 2026-10-31
+
+### Añadido
+
+- **Servicio `scheduler` en Docker**: un contenedor dedicado ejecuta `schedule:work`, de modo
+  que las sincronizaciones diarias y semanales, el recálculo de estadísticas y las alertas se
+  lanzan solos sin configurar cron en el anfitrión.
+- **Copia de seguridad diaria** con `db:backup`: volcado de PostgreSQL en formato custom
+  comprimido con zstd, validado antes de darlo por bueno y con rotación que solo toca las
+  copias que genera el propio comando.
+- **Ficheros de despliegue** en `deploy/` para separar la base de datos y la aplicación en dos
+  máquinas.
+
+### Cambiado
+
+- **Histórico a partir de 2018**: los años anteriores a la Ley 9/2017, cuando publicar en la
+  Plataforma de Contratación era voluntario, se agrupan en un bloque plegable. Mezclados con
+  el resto parecían una caída de actividad que nunca existió. El año de corte se configura en
+  `anio_cobertura_completa`.
+
+### Corregido
+
+- `app` y `scheduler` comparten ahora la misma imagen de Docker. Antes cada uno construía la
+  suya y una podía quedarse desfasada, como pasó con `pg_dump`, que faltaba en el scheduler.
+
 ## [1.9.0] - 2026-09-07
 
 ### Añadido

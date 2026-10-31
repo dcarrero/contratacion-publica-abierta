@@ -1,0 +1,42 @@
+# =============================================================================
+# Contratación Abierta — VM de aplicación (Proxmox)
+#
+# Solo app y scheduler: PostgreSQL vive en su propia VM y se alcanza por la red
+# privada (ver deploy/postgresql.conf.example y deploy/pg_hba.conf.example).
+#
+# Uso:
+#   cp deploy/docker-compose.prod.yml docker-compose.yml   (o -f al invocar)
+#   cp deploy/.env.produccion.example .env.docker          (y rellenar)
+#   docker compose up -d
+# =============================================================================
+services:
+  app:
+    build: ./docker
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/app
+      # Certificados de Caddy: sin este volumen se re-emiten en cada despliegue y
+      # Let's Encrypt acaba aplicando límites de ritmo.
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file: .env.docker
+    restart: unless-stopped
+
+  scheduler:
+    build: ./docker
+    volumes:
+      - .:/app
+    env_file: .env.docker
+    restart: unless-stopped
+    entrypoint: ["php", "artisan", "schedule:work"]
+    # El memory_limit de PHP es 1 GB; este margen evita que una importación grande
+    # (el ZIP de menores descomprime 3,2 GB) se lleve por delante la VM entera.
+    mem_limit: 2g
+    healthcheck:
+      disable: true
+
+volumes:
+  caddy_data:
+  caddy_config:

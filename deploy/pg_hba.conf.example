@@ -1,0 +1,19 @@
+# =============================================================================
+# pg_hba.conf — Contratación Abierta
+#
+# Solo la VM de aplicación puede conectarse, y con contraseña cifrada.
+# Ajusta las IP a las de tu red privada de Proxmox.
+# =============================================================================
+
+# TYPE  DATABASE       USER           ADDRESS            METHOD
+
+# Administración local (por socket) para mantenimiento desde la propia VM.
+local   all            postgres                          peer
+
+# Aplicación y scheduler desde la VM de app, por red privada.
+host    contratacion   contratacion   10.0.0.20/32       scram-sha-256
+
+# Copias de seguridad desde la propia VM.
+host    contratacion   contratacion   127.0.0.1/32       scram-sha-256
+
+# Todo lo demás, denegado. No añadas 0.0.0.0/0 ni "trust" ni siquiera temporalmente.

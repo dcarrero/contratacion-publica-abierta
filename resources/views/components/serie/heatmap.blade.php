@@ -5,7 +5,19 @@
     'rutaParam' => null,
 ])
 @php
-    $max = $metrica === 'importe' ? ($matriz['max_importe'] ?: 1) : ($matriz['max_num'] ?: 1);
+    // Los años previos a la Ley 9/2017 tienen una cobertura testimonial: en la matriz
+    // aparecían como filas casi vacías que además hundían la escala de color del resto.
+    $corte = (int) config('contratacion.anio_cobertura_completa', 2018);
+    $filasOcultas = count(array_filter($matriz['filas'], fn ($f) => $f['anio'] < $corte));
+    $matriz['filas'] = array_values(array_filter($matriz['filas'], fn ($f) => $f['anio'] >= $corte));
+
+    // Los máximos se recalculan sobre lo que se muestra, para que el color reparta bien.
+    $max = 1.0;
+    foreach ($matriz['filas'] as $fila) {
+        foreach ($fila['meses'] as $mes) {
+            $max = max($max, $metrica === 'importe' ? $mes['importe'] : (float) $mes['num']);
+        }
+    }
     $meses = App\Support\SerieTemporal::MESES_CORTOS;
 
     // Cinco tramos de intensidad: suficientes para leer el patrón sin convertir la tabla
@@ -88,5 +100,13 @@
         </span>
         <span>Más {{ $metrica === 'importe' ? 'importe' : 'contratos' }}</span>
         <span class="ml-2">La cifra de cada celda es el número de contratos.</span>
+        @if($filasOcultas > 0)
+            <span class="w-full text-gray-400">
+                Se muestran los años desde {{ $corte }}, cuando la publicación en la Plataforma de
+                Contratación pasó a ser obligatoria. Los {{ $filasOcultas }}
+                {{ $filasOcultas === 1 ? 'año anterior' : 'años anteriores' }} están en la tabla de
+                contratación año a año.
+            </span>
+        @endif
     </div>
 </x-ui.tarjeta>

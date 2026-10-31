@@ -1,0 +1,61 @@
+# =============================================================================
+# PostgreSQL 17 — Contratación Abierta (VM dedicada en Proxmox)
+#
+# Dimensionado para una VM de 4 vCPU y 12 GB de RAM dedicada a la base de datos.
+# Si tu VM tiene otra RAM, escala shared_buffers (~25%) y effective_cache_size (~75%).
+#
+# Punto de partida: 8,87M contratos, 27 GB de base (tabla contratos 10 GB, índices 3,7 GB).
+# Cargas dominantes: importaciones por lotes de madrugada y consultas de lectura del portal.
+# =============================================================================
+
+# --- Conexiones -------------------------------------------------------------
+# Solo la red privada. NUNCA 0.0.0.0: este servicio no debe verse desde fuera.
+listen_addresses = '10.0.0.10'          # <-- IP privada de ESTA VM
+port = 5432
+max_connections = 50                     # app + scheduler; sobra con esto
+
+# --- Memoria ----------------------------------------------------------------
+shared_buffers = 3GB                     # ~25% de la RAM
+effective_cache_size = 9GB               # ~75%: lo que el planificador supone en caché
+maintenance_work_mem = 768MB             # VACUUM, CREATE INDEX (el de fecha_efectiva tarda)
+work_mem = 32MB                          # por operación de orden/hash; con 50 conexiones, seguro
+
+# --- Disco (NVMe/SSD) -------------------------------------------------------
+random_page_cost = 1.1                   # en disco mecánico dejar 4
+effective_io_concurrency = 200
+
+# --- WAL y checkpoints ------------------------------------------------------
+# Las importaciones escriben en ráfagas: un max_wal_size pequeño provoca checkpoints
+# continuos y multiplica la escritura.
+max_wal_size = 4GB
+min_wal_size = 1GB
+checkpoint_completion_target = 0.9
+wal_compression = on
+
+# --- Paralelismo (4 vCPU) ---------------------------------------------------
+max_worker_processes = 4
+max_parallel_workers = 4
+max_parallel_workers_per_gather = 2
+max_parallel_maintenance_workers = 2
+
+# --- Estadísticas y autovacuum ----------------------------------------------
+# Umbrales más agresivos que los de serie: la tabla contratos recibe cientos de miles
+# de filas nuevas y actualizaciones en cada sincronización.
+default_statistics_target = 200
+autovacuum_vacuum_scale_factor = 0.05
+autovacuum_analyze_scale_factor = 0.02
+autovacuum_max_workers = 4
+
+# --- Registro ---------------------------------------------------------------
+log_min_duration_statement = 1000        # deja rastro de las consultas de más de 1 s
+log_checkpoints = on
+log_autovacuum_min_duration = 10000
+log_line_prefix = '%m [%p] %u@%d '
+
+# --- Localización -----------------------------------------------------------
+timezone = 'Europe/Madrid'
+lc_messages = 'es_ES.UTF-8'
+lc_monetary = 'es_ES.UTF-8'
+lc_numeric = 'es_ES.UTF-8'
+lc_time = 'es_ES.UTF-8'
+default_text_search_config = 'pg_catalog.spanish'
