@@ -157,4 +157,51 @@ class AndaluciaParserTest extends TestCase
         // El NIF sintético empieza con 'ANDA-'
         $this->assertStringStartsWith('ANDA-', $result['nif_organo']);
     }
+
+    /**
+     * El CSV real trae las fechas como dd/mm/aaaa rellenas con espacios. Antes se leían
+     * como fecha americana (día ≤ 12) o como la fecha del día (día > 12).
+     */
+    public function test_padded_spanish_dates_are_parsed_day_first(): void
+    {
+        $result = $this->parser->parse([
+            'ID_EXPEDIENTE' => 'AND-2026-001',
+            'NUM_EXPEDIENTE' => 'EXP-AND-001',
+            'ORGANO_CONTRATACION' => 'Servicio Andaluz de Salud',
+            'TITULO' => 'Suministro de medicamentos',
+            'FECHA_ADJUDICACION' => '05/01/2026                    ',
+            'FECHA_FORMALIZACION' => '22/01/2026                    ',
+        ], 2026);
+
+        $this->assertNotNull($result);
+        $this->assertSame('2026-01-05', $result['fecha_adjudicacion']);
+    }
+
+    public function test_day_above_twelve_is_not_replaced_by_today(): void
+    {
+        $result = $this->parser->parse([
+            'ID_EXPEDIENTE' => 'AND-2026-002',
+            'NUM_EXPEDIENTE' => 'EXP-AND-002',
+            'ORGANO_CONTRATACION' => 'Servicio Andaluz de Salud',
+            'TITULO' => 'Suministro de medicamentos',
+            'FECHA_ADJUDICACION' => '22/01/2026                    ',
+        ], 2026);
+
+        $this->assertSame('2026-01-22', $result['fecha_adjudicacion']);
+    }
+
+    public function test_blank_or_invalid_dates_stay_empty(): void
+    {
+        foreach (['                    ', '31/02/2026', 'sin fecha'] as $valor) {
+            $result = $this->parser->parse([
+                'ID_EXPEDIENTE' => 'AND-2026-003',
+                'NUM_EXPEDIENTE' => 'EXP-AND-003',
+                'ORGANO_CONTRATACION' => 'Servicio Andaluz de Salud',
+                'TITULO' => 'Suministro',
+                'FECHA_ADJUDICACION' => $valor,
+            ], 2026);
+
+            $this->assertNull($result['fecha_adjudicacion'], "Valor: '{$valor}'");
+        }
+    }
 }

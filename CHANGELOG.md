@@ -3,6 +3,16 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.9.5] - 2026-11-01
+
+### Corregido
+
+- **Andalucía**: las fechas del CSV de contratos menores (`dd/mm/aaaa` rellenas con espacios)
+  se leían mal. Con el día mayor que 12 el contrato recibía la fecha del sync, y con el día de
+  1 a 12 se intercambiaban día y mes. Afectaba a 2025 y 2026, los años que se recargan cada
+  semana, y cada recarga creaba una versión nueva en el historial. Ahora solo se aceptan
+  `dd/mm/aaaa` e ISO, con la fecha validada; una nueva sincronización de esos años lo repara.
+
 ## [1.9.4] - 2026-11-01
 
 ### Corregido

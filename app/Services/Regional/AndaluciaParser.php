@@ -132,25 +132,21 @@ class AndaluciaParser
             return null;
         }
 
-        try {
-            $date = new \DateTimeImmutable($value);
+        // Solo formatos explícitos. Antes se probaba primero new DateTimeImmutable($value):
+        // con "05/01/2026" lo leía como fecha americana (1 de mayo) y con "22/01/2026" seguido
+        // de los espacios de relleno del CSV devolvía la fecha del día. 113.000 contratos
+        // acabaron adjudicados el día de cada sync y otros miles con día y mes cambiados.
+        $value = trim($value);
 
-            return $date->format('Y-m-d');
-        } catch (\Exception) {
-            // Intentar formato dd/mm/yyyy
-            $parts = explode('/', $value);
-            if (count($parts) === 3) {
-                try {
-                    $date = new \DateTimeImmutable("{$parts[2]}-{$parts[1]}-{$parts[0]}");
-
-                    return $date->format('Y-m-d');
-                } catch (\Exception) {
-                    return null;
-                }
-            }
-
+        if (preg_match('#^(\d{1,2})/(\d{1,2})/(\d{4})#', $value, $m)) {
+            [$day, $month, $year] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        } elseif (preg_match('#^(\d{4})-(\d{2})-(\d{2})#', $value, $m)) {
+            [$year, $month, $day] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        } else {
             return null;
         }
+
+        return checkdate($month, $day, $year) ? sprintf('%04d-%02d-%02d', $year, $month, $day) : null;
     }
 
     private function cleanNif(?string $nif): ?string
