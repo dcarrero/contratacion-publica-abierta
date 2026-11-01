@@ -3,6 +3,14 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.9.4] - 2026-11-01
+
+### Corregido
+
+- **Euskadi**: algunas empresas extranjeras llegan con el nombre en el campo del NIF. No
+  cabía en la columna y el contrato no se actualizaba; ahora se guarda sin NIF y con el
+  nombre del adjudicatario.
+
 ## [1.9.3] - 2026-11-01
 
 ### Corregido

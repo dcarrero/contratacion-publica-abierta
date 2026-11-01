@@ -52,4 +52,17 @@ class PaisVascoParserTest extends TestCase
         $this->assertSame('13 Días', $data['duracion']);
         $this->assertSame(1000.0, $data['importe_licitacion']);
     }
+
+    public function test_company_name_in_the_nif_field_is_dropped_but_the_name_is_kept(): void
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><contractingAnnouncement>'
+            .'<businessCif>CAST GROUP OF COMPANIES INC.</businessCif>'
+            .'<businessName>CAST Group of Companies Inc.</businessName>'
+            .'</contractingAnnouncement>';
+
+        $data = (new PaisVascoParser)->parseXmlDetail($xml);
+
+        $this->assertArrayNotHasKey('nif_adjudicatario', $data);
+        $this->assertSame('CAST Group of Companies Inc.', $data['nombre_adjudicatario']);
+    }
 }

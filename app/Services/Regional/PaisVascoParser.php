@@ -347,7 +347,10 @@ class PaisVascoParser
 
         $nif = mb_strtoupper(trim($nif));
 
-        if (mb_strlen($nif) < 5) {
+        // Más de 20 caracteres no cabe en la columna y no es un NIF: algunas empresas
+        // extranjeras llegan con el nombre en ese campo ("CAST GROUP OF COMPANIES INC.").
+        // Sin NIF el update sigue adelante con el nombre, en vez de fallar entero.
+        if (mb_strlen($nif) < 5 || mb_strlen($nif) > 20) {
             return null;
         }
 
