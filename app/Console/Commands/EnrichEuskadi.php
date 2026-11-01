@@ -8,6 +8,7 @@ use App\Models\Contrato;
 use App\Services\Regional\PaisVascoParser;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class EnrichEuskadi extends Command
@@ -16,12 +17,16 @@ class EnrichEuskadi extends Command
         {--year=* : Años a enriquecer (ej: --year=2024). Por defecto todos desde 2018}
         {--concurrency=10 : Número de requests HTTP concurrentes}
         {--limit=0 : Límite de XMLs a procesar por año (0 = todos)}
-        {--dry-run : Solo mostrar estadísticas, no actualizar}';
+        {--dry-run : Solo mostrar estadísticas, no actualizar}
+        {--todos : Volver a consultar también los XML ya consultados que no han cambiado}
+        {--json= : Usar un JSON local en vez de descargarlo (un solo año)}';
 
     protected $description = 'Enriquece contratos de Euskadi con datos del XML detallado (importes, adjudicatario, CPV)';
 
     /** Identificadores por consulta al buscar qué contratos faltan por enriquecer. */
     private const LOOKUP_CHUNK = 5000;
+
+    private const FUENTE = 'eusk';
 
     private int $enriched = 0;
 
@@ -55,17 +60,20 @@ class EnrichEuskadi extends Command
             $this->newLine();
             $this->info("=== Año {$year} ===");
 
-            // Descargar JSON
-            $tempFile = storage_path("app/eusk_temp_enrich_{$year}.json");
-            $this->line('Descargando JSON...');
+            $localJson = $this->option('json');
+            if (is_string($localJson) && $localJson !== '') {
+                $records = $this->loadJsonFile($localJson);
+            } else {
+                $tempFile = storage_path("app/eusk_temp_enrich_{$year}.json");
+                $this->line('Descargando JSON...');
 
-            if (! $this->downloadFile($url, $tempFile)) {
-                continue;
+                if (! $this->downloadFile($url, $tempFile)) {
+                    continue;
+                }
+
+                $records = $this->loadJsonFile($tempFile);
+                @unlink($tempFile);
             }
-
-            // Cargar y extraer URLs XML
-            $records = $this->loadJsonFile($tempFile);
-            @unlink($tempFile);
 
             if ($records === null) {
                 $this->error("Error parseando JSON para año {$year}");
@@ -106,20 +114,7 @@ class EnrichEuskadi extends Command
             // todos los miércoles de octubre de 2026.
             $needEnrichment = [];
             foreach (array_chunk(array_keys($xmlMap), self::LOOKUP_CHUNK) as $placspIds) {
-                $encontrados = Contrato::whereIn('placsp_id', $placspIds)
-                    ->where(function ($q) {
-                        $q->whereNull('importe_adjudicacion')
-                            ->orWhere(function ($q2) {
-                                $q2->whereNull('nif_adjudicatario')
-                                    ->orWhere('nif_adjudicatario', 'like', 'EUSK-%');
-                            })
-                            ->orWhereNull('tipo_contrato')
-                            ->orWhereNull('procedimiento')
-                            ->orWhereNull('cpv');
-                    })
-                    ->pluck('placsp_id')
-                    ->all();
-                array_push($needEnrichment, ...$encontrados);
+                array_push($needEnrichment, ...$this->pendingIds($placspIds, (bool) $this->option('todos')));
             }
 
             // Filtrar xmlMap solo a los que necesitan enriquecimiento
@@ -177,6 +172,61 @@ class EnrichEuskadi extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Contratos a los que les falta algún dato y cuyo XML no se ha consultado desde su
+     * último cambio. Con $todos se ignora el registro de consultas.
+     *
+     * @param  list<string>  $placspIds
+     * @return list<string>
+     */
+    private function pendingIds(array $placspIds, bool $todos): array
+    {
+        $query = Contrato::query()
+            ->whereIn('contratos.placsp_id', $placspIds)
+            ->where(function ($q) {
+                $q->whereNull('contratos.importe_adjudicacion')
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('contratos.nif_adjudicatario')
+                            ->orWhere('contratos.nif_adjudicatario', 'like', 'EUSK-%');
+                    })
+                    ->orWhereNull('contratos.tipo_contrato')
+                    ->orWhereNull('contratos.procedimiento')
+                    ->orWhereNull('contratos.cpv');
+            });
+
+        if (! $todos) {
+            $query->leftJoin('contrato_enriquecimientos as ce', 'ce.placsp_id', '=', 'contratos.placsp_id')
+                ->where(function ($q) {
+                    $q->whereNull('ce.id')
+                        ->orWhereColumn('contratos.updated_at', '>', 'ce.consultado_at');
+                });
+        }
+
+        return $query->pluck('contratos.placsp_id')->all();
+    }
+
+    /**
+     * Anota como consultados los XML que respondieron, tuvieran datos o no. Los fallos no se
+     * anotan, así que se reintentan en la siguiente ejecución.
+     *
+     * @param  list<string>  $placspIds
+     */
+    private function markConsulted(array $placspIds): void
+    {
+        if ($placspIds === []) {
+            return;
+        }
+
+        // Después de los UPDATE del lote: así consultado_at >= updated_at del contrato.
+        $ahora = now();
+        $filas = array_map(
+            fn (string $id) => ['placsp_id' => $id, 'fuente' => self::FUENTE, 'consultado_at' => $ahora],
+            $placspIds,
+        );
+
+        DB::table('contrato_enriquecimientos')->upsert($filas, ['placsp_id'], ['consultado_at']);
+    }
+
     private function processBatch(array $batch, PaisVascoParser $parser): void
     {
         // Lanzar requests concurrentes
@@ -190,6 +240,7 @@ class EnrichEuskadi extends Command
         });
 
         // Procesar respuestas
+        $consultados = [];
         foreach ($batch as $placspId => $xmlUrl) {
             try {
                 $response = $responses[$placspId] ?? null;
@@ -205,6 +256,7 @@ class EnrichEuskadi extends Command
 
                 if (empty($xmlData)) {
                     $this->skipped++;
+                    $consultados[] = $placspId;
 
                     continue;
                 }
@@ -255,6 +307,7 @@ class EnrichEuskadi extends Command
                 } else {
                     $this->skipped++;
                 }
+                $consultados[] = $placspId;
 
             } catch (\Throwable $e) {
                 $this->errors++;
@@ -264,6 +317,8 @@ class EnrichEuskadi extends Command
                 }
             }
         }
+
+        $this->markConsulted($consultados);
     }
 
     private function downloadFile(string $url, string $path): bool

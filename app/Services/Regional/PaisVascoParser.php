@@ -131,6 +131,37 @@ class PaisVascoParser
         return mb_convert_encoding($xml, 'UTF-8', $origen);
     }
 
+    private function extractCpvs(string $xml): ?string
+    {
+        if (preg_match('/<cpvs[^>]*>(.*?)<\/cpvs>/s', $xml, $bloque) !== 1) {
+            return null;
+        }
+
+        preg_match_all('/<cpv\s[^>]*id="(\d{8}-\d)"[^>]*>(.*?)<\/cpv>/s', $bloque[1], $cpvs, PREG_SET_ORDER);
+
+        $principales = [];
+        $resto = [];
+        foreach ($cpvs as [, $codigo, $cuerpo]) {
+            if (preg_match('/<main[^>]*>\s*true\s*<\/main>/i', $cuerpo) === 1) {
+                $principales[] = $codigo;
+            } else {
+                $resto[] = $codigo;
+            }
+        }
+
+        // La columna admite 255 caracteres: se corta por código completo, nunca a medias.
+        $resultado = '';
+        foreach (array_unique([...$principales, ...$resto]) as $codigo) {
+            $siguiente = $resultado === '' ? $codigo : $resultado.'||'.$codigo;
+            if (strlen($siguiente) > 255) {
+                break;
+            }
+            $resultado = $siguiente;
+        }
+
+        return $resultado !== '' ? $resultado : null;
+    }
+
     /**
      * Formato nuevo (2021+): tags semánticos XML.
      */
@@ -139,8 +170,13 @@ class PaisVascoParser
         $data = [];
 
         // Importes de licitación
-        $data['importe_licitacion'] = $this->extractXmlFloat($xml, 'tenderBudgetWithoutTaxes');
-        $data['importe_licitacion_con_iva'] = $this->extractXmlFloat($xml, 'tenderBudgetWithTaxes');
+        // Los XML actuales lo publican como <budgetWithoutVAT desc="Presupuesto del contrato
+        // sin IVA">; la misma etiqueta con desc="Precio…" es el precio adjudicado, por eso se
+        // filtra por la descripción.
+        $data['importe_licitacion'] = $this->extractXmlFloat($xml, 'tenderBudgetWithoutTaxes')
+            ?? $this->extractXmlFloat($xml, 'budgetWithoutVAT', 'Presupuesto del contrato');
+        $data['importe_licitacion_con_iva'] = $this->extractXmlFloat($xml, 'tenderBudgetWithTaxes')
+            ?? $this->extractXmlFloat($xml, 'budgetWithVAT', 'Presupuesto del contrato');
 
         // Importes de adjudicación (de resolutions)
         $data['importe_adjudicacion'] = $this->extractXmlFloat($xml, 'priceWithoutVAT')
@@ -176,8 +212,12 @@ class PaisVascoParser
             $data['procedimiento'] = html_entity_decode(trim($m[1]));
         }
 
-        // CPV
-        if (preg_match('/<cpvCode[^>]*>(.*?)<\/cpvCode>/s', $xml, $m)) {
+        // CPV: <cpvs><cpv id="38540000-2">…<main>true</main></cpv>…</cpvs>. El principal va
+        // primero y el resto detrás, separados por «||» como en las demás fuentes. Hasta
+        // noviembre de 2026 se buscaba <cpvCode>, que este formato no usa, y ningún contrato
+        // de Euskadi tenía CPV. Los contratos menores lo publican vacío (<cpvs/>).
+        $data['cpv'] = $this->extractCpvs($xml);
+        if ($data['cpv'] === null && preg_match('/<cpvCode[^>]*>(.*?)<\/cpvCode>/s', $xml, $m)) {
             $data['cpv'] = trim($m[1]);
         }
 
@@ -389,9 +429,13 @@ class PaisVascoParser
         return null;
     }
 
-    private function extractXmlFloat(string $xml, string $tag): ?float
+    private function extractXmlFloat(string $xml, string $tag, ?string $descPrefix = null): ?float
     {
-        if (preg_match("/<{$tag}[^>]*>(.*?)<\/{$tag}>/s", $xml, $m)) {
+        $atributos = $descPrefix !== null
+            ? '[^>]*desc="'.preg_quote($descPrefix, '/').'[^"]*"[^>]*'
+            : '[^>]*';
+
+        if (preg_match("/<{$tag}{$atributos}>(.*?)<\/{$tag}>/s", $xml, $m)) {
             $value = html_entity_decode(trim($m[1]));
             // Formato europeo: 431.295 o 521.866,95
             $value = str_replace('.', '', $value);

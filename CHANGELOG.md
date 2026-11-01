@@ -3,6 +3,24 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.9.3] - 2026-11-01
+
+### Corregido
+
+- **Euskadi**: el enriquecimiento no extraía nunca el CPV ni el importe de licitación, porque
+  buscaba etiquetas que el XML de detalle no usa. Ahora lee el bloque `<cpvs>` (primero los
+  CPV principales) y el presupuesto de `<budgetWithoutVAT>` cuando es el del contrato, sin
+  confundirlo con el precio adjudicado.
+- **PostgreSQL en Docker**: `oom_score_adj` para que, si la máquina se queda sin memoria, el
+  sistema no elija la base de datos.
+
+### Cambiado
+
+- **Enriquecimiento incremental de Euskadi**: cada XML consultado se anota en la tabla nueva
+  `contrato_enriquecimientos`, y la pasada semanal solo pide los contratos nuevos, los que la
+  sincronización ha modificado después y los que fallaron. Antes repetía cada semana unos
+  85.000 XML. `--todos` fuerza una pasada completa y `--json=` usa un fichero local.
+
 ## [1.9.2] - 2026-10-31
 
 ### Añadido

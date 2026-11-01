@@ -57,6 +57,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
     shm_size: 1gb
     restart: unless-stopped
+    # Que el OOM killer de la VM de Docker elija a cualquier otro antes que a la BD. El
+    # 2026-10-31 mató dos veces el checkpointer en plena carga, con otros proyectos
+    # arrancando contenedores en la misma VM. Se recuperó solo, pero no debe repetirse.
+    oom_score_adj: -800
     # Tuning para BD de ~25 GB / 8,4M filas en host de 8 GB RAM y 12 CPUs.
     # Sólo parámetros de rendimiento: no altera datos ni esquema.
     command:
