@@ -80,8 +80,8 @@
                     <td class="px-4 py-3 text-right font-medium whitespace-nowrap">{{ $importeDe($contrato) }}</td>
                     @if($mostrarPlacsp)
                         <td class="px-4 py-3 text-center">
-                            @if($contrato->url_placsp)
-                                <a href="{{ $contrato->url_placsp }}" target="_blank" rel="noopener"
+                            @if(\App\Support\SafeUrl::forLink($contrato->url_placsp))
+                                <a href="{{ \App\Support\SafeUrl::forLink($contrato->url_placsp) }}" target="_blank" rel="noopener"
                                    class="text-primary hover:text-primary-oscuro underline text-xs">
                                     Ver<span class="sr-only"> el contrato «{{ Str::limit($contrato->objeto, 60) }}» en PLACSP</span>
                                 </a>
@@ -135,8 +135,8 @@
                 <dd class="text-right font-semibold text-gray-900" data-cifras>{{ $importeDe($contrato) }}</dd>
             </dl>
 
-            @if($mostrarPlacsp && $contrato->url_placsp)
-                <a href="{{ $contrato->url_placsp }}" target="_blank" rel="noopener"
+            @if($mostrarPlacsp && \App\Support\SafeUrl::forLink($contrato->url_placsp))
+                <a href="{{ \App\Support\SafeUrl::forLink($contrato->url_placsp) }}" target="_blank" rel="noopener"
                    class="mt-2 inline-block text-xs text-primary hover:text-primary-oscuro underline">
                     Ver en PLACSP<span class="sr-only">: {{ Str::limit($contrato->objeto, 60) }}</span>
                 </a>

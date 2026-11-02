@@ -8,6 +8,7 @@ use App\Models\FuenteDatos;
 use App\Models\ImportLog;
 use App\Services\ContratoImporter;
 use App\Services\Regional\AndaluciaParser;
+use App\Support\SafeUrl;
 use Illuminate\Console\Command;
 use League\Csv\Reader;
 
@@ -161,6 +162,14 @@ class SyncAndalucia extends Command
                                 'www.juntadeandalucia.es',
                                 $resourceUrl
                             );
+
+                            // La URL la dicta la API remota: solo se acepta si es https y
+                            // del dominio de la Junta (evita SSRF si la API se manipula).
+                            if (! SafeUrl::isAllowedDownload($resourceUrl, ['juntadeandalucia.es'])) {
+                                $this->warn("  URL de recurso fuera del dominio de la Junta, se ignora: {$resourceUrl}");
+
+                                return null;
+                            }
                         }
 
                         return $resourceUrl;
@@ -183,7 +192,7 @@ class SyncAndalucia extends Command
         try {
             $ch = curl_init($url);
             $fp = fopen($tempFile, 'w');
-            curl_setopt_array($ch, [
+            curl_setopt_array($ch, SafeUrl::curlOptions() + [
                 CURLOPT_FILE => $fp,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_TIMEOUT => 600,

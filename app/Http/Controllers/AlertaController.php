@@ -8,6 +8,7 @@ use App\Mail\VerificacionSuscripcion;
 use App\Models\AlertaSuscripcion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AlertaController extends Controller
@@ -22,8 +23,11 @@ class AlertaController extends Controller
             'frecuencia' => 'sometimes|in:diaria,semanal',
         ]);
 
+        // Normalizado: una variante en mayúsculas no debe saltarse la cuota por email.
+        $validated['email'] = Str::lower(trim($validated['email']));
+
         $maxPorEmail = config('contratacion.alertas.max_por_email', 20);
-        $existentes = AlertaSuscripcion::where('email', $validated['email'])->activa()->count();
+        $existentes = AlertaSuscripcion::whereRaw('LOWER(email) = ?', [$validated['email']])->activa()->count();
 
         if ($existentes >= $maxPorEmail) {
             return view('alertas.mensaje', [
@@ -34,7 +38,7 @@ class AlertaController extends Controller
         }
 
         // Evitar duplicados exactos
-        $existeDuplicada = AlertaSuscripcion::where('email', $validated['email'])
+        $existeDuplicada = AlertaSuscripcion::whereRaw('LOWER(email) = ?', [$validated['email']])
             ->where('tipo', $validated['tipo'])
             ->where('filtro_valor', $validated['filtro_valor'])
             ->activa()

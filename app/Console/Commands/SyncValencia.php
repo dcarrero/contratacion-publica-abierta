@@ -8,6 +8,7 @@ use App\Console\Commands\Support\RegionalSyncCommand;
 use App\Models\FuenteDatos;
 use App\Services\ContratoImporter;
 use App\Services\Regional\ValenciaParser;
+use App\Support\SafeUrl;
 use Illuminate\Support\Facades\Http;
 use League\Csv\Reader;
 
@@ -147,7 +148,9 @@ class SyncValencia extends RegionalSyncCommand
 
                         return [
                             'id' => (string) $resource['id'],
-                            'url' => str_starts_with($url, 'https://') ? $url : null,
+                            // Solo https y del dominio de la Generalitat; si no, se usa la
+                            // URL de respaldo construida con BASE_URL y el id del recurso.
+                            'url' => SafeUrl::isAllowedDownload($url, ['gva.es']) ? $url : null,
                         ];
                     }
                 }
@@ -171,7 +174,7 @@ class SyncValencia extends RegionalSyncCommand
         try {
             $ch = curl_init($url);
             $fp = fopen($tempFile, 'w');
-            curl_setopt_array($ch, [
+            curl_setopt_array($ch, SafeUrl::curlOptions() + [
                 CURLOPT_FILE => $fp,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_TIMEOUT => 600,

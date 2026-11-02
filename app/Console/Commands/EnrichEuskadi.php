@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Models\Contrato;
 use App\Services\Regional\PaisVascoParser;
+use App\Support\SafeUrl;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\DB;
@@ -94,6 +95,10 @@ class EnrichEuskadi extends Command
                     if (str_ends_with($xmlUrl, '.zip')) {
                         $zipSkipped++;
 
+                        continue;
+                    }
+                    // dataXML lo dicta el JSON remoto: solo https y de euskadi.eus (SSRF).
+                    if (! SafeUrl::isAllowedDownload($xmlUrl, PaisVascoParser::ALLOWED_DOMAINS)) {
                         continue;
                     }
                     $placspId = 'EUSK-'.$expediente;
@@ -233,6 +238,7 @@ class EnrichEuskadi extends Command
         $responses = Http::pool(function ($pool) use ($batch) {
             foreach ($batch as $placspId => $xmlUrl) {
                 $pool->as($placspId)
+                    ->withOptions(SafeUrl::guzzleOptions())
                     ->timeout(15)
                     ->retry(2, 500)
                     ->get($xmlUrl);
@@ -326,7 +332,7 @@ class EnrichEuskadi extends Command
         try {
             $ch = curl_init($url);
             $fp = fopen($path, 'w');
-            curl_setopt_array($ch, [
+            curl_setopt_array($ch, SafeUrl::curlOptions() + [
                 CURLOPT_FILE => $fp,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_TIMEOUT => 600,

@@ -15,8 +15,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ExportController extends Controller
 {
     /**
-     * Sanitiza valor para CSV: previene inyección de fórmulas en Excel.
-     * Si empieza con =, +, -, @ o \t, se prefija con apóstrofe.
+     * Sanitiza un valor de texto para CSV frente a inyección de fórmulas (Excel/Calc).
+     * Si, quitando espacios iniciales, empieza por =, +, -, @, tabulador, CR o LF, se
+     * prefija con apóstrofo. Se aplica a todo texto que venga de fuentes externas.
      */
     private function csvSafe(?string $value): ?string
     {
@@ -24,7 +25,9 @@ class ExportController extends Controller
             return $value;
         }
 
-        if (in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+        $trimmed = ltrim($value, ' ');
+
+        if ($trimmed !== '' && in_array($trimmed[0], ['=', '+', '-', '@', "\t", "\r", "\n"], true)) {
             return "'".$value;
         }
 
@@ -99,7 +102,7 @@ class ExportController extends Controller
                 }
 
                 $csv->insertOne([
-                    $contrato->placsp_id,
+                    $this->csvSafe($contrato->placsp_id),
                     $this->csvSafe($contrato->expediente),
                     $this->csvSafe($contrato->objeto),
                     $contrato->tipo_contrato,
@@ -110,15 +113,15 @@ class ExportController extends Controller
                     $contrato->fecha_publicacion?->format('Y-m-d'),
                     $contrato->fecha_adjudicacion?->format('Y-m-d'),
                     $contrato->fecha_formalizacion?->format('Y-m-d'),
-                    $contrato->nif_organo,
-                    $contrato->getAttribute('org_nombre'),
-                    $contrato->nif_adjudicatario,
-                    $contrato->getAttribute('adj_nombre'),
+                    $this->csvSafe($contrato->nif_organo),
+                    $this->csvSafe($contrato->getAttribute('org_nombre')),
+                    $this->csvSafe($contrato->nif_adjudicatario),
+                    $this->csvSafe($contrato->getAttribute('adj_nombre')),
                     $contrato->nuts,
                     $contrato->cpv,
                     $contrato->es_menor ? '1' : '0',
                     $contrato->num_ofertas,
-                    $contrato->url_placsp,
+                    $this->csvSafe($contrato->url_placsp),
                 ]);
             }
         }, 200, [
@@ -147,10 +150,10 @@ class ExportController extends Controller
 
             foreach ($query->cursor() as $org) {
                 $csv->insertOne([
-                    $org->nif,
-                    $org->nombre,
-                    $org->dir3,
-                    $org->nivel_administracion,
+                    $this->csvSafe($org->nif),
+                    $this->csvSafe($org->nombre),
+                    $this->csvSafe($org->dir3),
+                    $this->csvSafe($org->nivel_administracion),
                     $org->total_contratos,
                     $org->total_importe,
                     $org->nuts,
@@ -186,8 +189,8 @@ class ExportController extends Controller
 
             foreach ($query->cursor() as $adj) {
                 $csv->insertOne([
-                    $adj->nif,
-                    $adj->nombre,
+                    $this->csvSafe($adj->nif),
+                    $this->csvSafe($adj->nombre),
                     $adj->total_contratos,
                     $adj->total_importe,
                 ]);

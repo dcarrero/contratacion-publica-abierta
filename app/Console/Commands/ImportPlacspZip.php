@@ -9,6 +9,7 @@ use App\Models\FuenteDatos;
 use App\Models\ImportLog;
 use App\Services\ContratoImporter;
 use App\Services\Placsp\PlacspEntryParser;
+use App\Support\SafeUrl;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
@@ -475,7 +476,7 @@ class ImportPlacspZip extends Command
         }
 
         try {
-            $response = Http::withOptions(['stream' => true])
+            $response = Http::withOptions(['stream' => true] + SafeUrl::guzzleOptions())
                 ->timeout(30)
                 ->withHeaders([
                     'User-Agent' => self::USER_AGENT,
@@ -535,7 +536,9 @@ class ImportPlacspZip extends Command
             $escapedUrl = escapeshellarg($url);
             $escapedPath = escapeshellarg($path);
             $userAgent = escapeshellarg(self::USER_AGENT);
-            $cmd = "curl -sL --max-time 600 -A {$userAgent} -o {$escapedPath} {$escapedUrl}";
+            // Redirecciones solo a https y como mucho 5: una redirección del servidor no
+            // puede desviar la descarga a http, file:// ni a otros protocolos.
+            $cmd = "curl -sL --proto =https --proto-redir =https --max-redirs 5 --max-time 600 -A {$userAgent} -o {$escapedPath} {$escapedUrl}";
             exec($cmd, $output, $exitCode);
 
             if ($exitCode === 0 && file_exists($path) && filesize($path) > 1024) {
@@ -552,7 +555,7 @@ class ImportPlacspZip extends Command
         try {
             $response = Http::withOptions([
                 'sink' => $path,
-            ])
+            ] + SafeUrl::guzzleOptions())
                 ->timeout(600)
                 ->withHeaders([
                     'User-Agent' => self::USER_AGENT,

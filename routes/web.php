@@ -110,7 +110,7 @@ Route::prefix('admin')->middleware('admin.ip')->group(function (): void {
         ->middleware('throttle:5,1')
         ->name('admin.login.submit');
 
-    Route::middleware('auth')->group(function (): void {
+    Route::middleware(['auth', 'admin'])->group(function (): void {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
         Route::get('/', AdminDashboardController::class)->name('admin.dashboard');
         Route::get('/import-logs', AdminImportLogController::class)->name('admin.import-logs');

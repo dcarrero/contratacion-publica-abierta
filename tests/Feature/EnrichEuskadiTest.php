@@ -32,9 +32,9 @@ class EnrichEuskadiTest extends TestCase
 
         $this->json = tempnam(sys_get_temp_dir(), 'eusk').'.json';
         file_put_contents($this->json, json_encode([
-            ['contratacion_expediente' => 'ORD-1', 'dataXML' => 'https://xml.test/ord-1.xml'],
-            ['contratacion_expediente' => 'MEN-1', 'dataXML' => 'https://xml.test/men-1.xml'],
-            ['contratacion_expediente' => 'ROTO-1', 'dataXML' => 'https://xml.test/roto-1.xml'],
+            ['contratacion_expediente' => 'ORD-1', 'dataXML' => 'https://www.contratacion.euskadi.eus/test/ord-1.xml'],
+            ['contratacion_expediente' => 'MEN-1', 'dataXML' => 'https://www.contratacion.euskadi.eus/test/men-1.xml'],
+            ['contratacion_expediente' => 'ROTO-1', 'dataXML' => 'https://www.contratacion.euskadi.eus/test/roto-1.xml'],
         ]));
 
         foreach (['ORD-1', 'MEN-1', 'ROTO-1'] as $i => $exp) {

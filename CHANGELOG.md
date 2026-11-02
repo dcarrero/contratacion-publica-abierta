@@ -3,6 +3,39 @@
 Todos los cambios relevantes de la versión pública de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/) y versionado semántico.
 
+## [1.9.6] - 2026-11-02
+
+Versión de seguridad, fruto de una auditoría de caja blanca. **Al actualizar hay que ejecutar**
+`php artisan migrate --force` y `php artisan db:seed --class=AdminUserSeeder --force`; sin el
+segundo paso nadie puede entrar en el panel de administración.
+
+### Seguridad
+
+- **Panel de administración**: estar autenticado ya no basta; hace falta el rol de administrador
+  (nueva columna `users.is_admin`, que el registro de cuentas no puede activar). El login del panel
+  rechaza las cuentas sin rol, bloquea una cuenta tras 5 intentos fallidos aunque lleguen desde IP
+  distintas, registra los fallos en el log y ya no ofrece «recordarme».
+- **Lista de IP del panel** (`ADMIN_ALLOWED_IPS`): ahora falla cerrada (vacía = no entra nadie, antes
+  era al revés) y admite rangos CIDR, IPv4 e IPv6.
+- **Cuenta del administrador**: su dirección (`ADMIN_EMAIL`) no se puede registrar ni poner en otro
+  perfil, y `AdminUserSeeder` recupera la cuenta si alguien se adelantó: impone la contraseña de
+  `ADMIN_PASSWORD`, rota el token «recordarme» y cierra sus sesiones.
+- **Sesiones**: cambiar o restablecer la contraseña cierra las demás sesiones e invalida las cookies
+  «recordarme», que además duran 30 días en vez de ~400. La cookie de sesión lleva `Secure` cuando
+  `APP_URL` es https, y fuera de local se rechaza cualquier cabecera `Host` que no sea la de `APP_URL`.
+- **Contraseñas**: mínimo 12 caracteres con letras y números; en producción, además, se comprueban
+  contra Have I Been Pwned (k-anonimato). Registro limitado a 5 cuentas por IP y hora.
+- **Grafo de relaciones**: los nombres y NIF de organismos y empresas se escapan antes de pintarse;
+  un nombre con HTML en una fuente de datos podía ejecutar código en el navegador.
+- **Enlaces a la fuente oficial**: solo se pintan si la URL importada es http o https.
+- **Exportación CSV**: todas las columnas de texto se protegen frente a inyección de fórmulas en
+  hojas de cálculo (antes solo expediente y objeto).
+- **Descargas de las sincronizaciones**: todas van solo por https, también en las redirecciones
+  (máximo 5). Las URL que dicta el propio origen (paginación de los feeds de PLACSP, detalle XML de
+  Euskadi, recursos CKAN de Andalucía, Valencia y Ayuntamiento de Madrid) deben ser del dominio
+  oficial correspondiente; si no, se ignoran.
+- **Alertas**: el email se normaliza antes de contar la cuota por dirección.
+
 ## [1.9.5] - 2026-11-01
 
 ### Corregido

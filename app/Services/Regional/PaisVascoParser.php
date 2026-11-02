@@ -6,6 +6,9 @@ namespace App\Services\Regional;
 
 class PaisVascoParser
 {
+    /** Dominios de los que se acepta descargar el detalle XML (campo dataXML). */
+    public const ALLOWED_DOMAINS = ['euskadi.eus'];
+
     /**
      * Parsea un registro JSON del catálogo anual de contrataciones de Euskadi.
      *

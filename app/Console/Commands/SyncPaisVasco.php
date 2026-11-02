@@ -8,6 +8,7 @@ use App\Models\FuenteDatos;
 use App\Models\ImportLog;
 use App\Services\ContratoImporter;
 use App\Services\Regional\PaisVascoParser;
+use App\Support\SafeUrl;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
@@ -84,7 +85,7 @@ class SyncPaisVasco extends Command
             try {
                 $ch = curl_init($url);
                 $fp = fopen($tempFile, 'w');
-                curl_setopt_array($ch, [
+                curl_setopt_array($ch, SafeUrl::curlOptions() + [
                     CURLOPT_FILE => $fp,
                     CURLOPT_FOLLOWLOCATION => true,
                     CURLOPT_TIMEOUT => 600,
@@ -282,8 +283,14 @@ class SyncPaisVasco extends Command
 
     private function fetchXmlDetail(PaisVascoParser $parser, string $url): array
     {
+        // dataXML lo dicta el JSON remoto: solo https y de euskadi.eus (SSRF).
+        if (! SafeUrl::isAllowedDownload($url, PaisVascoParser::ALLOWED_DOMAINS)) {
+            return [];
+        }
+
         try {
             $response = Http::timeout(15)
+                ->withOptions(SafeUrl::guzzleOptions())
                 ->retry(2, 1000)
                 ->get($url);
 

@@ -8,6 +8,7 @@ use App\Console\Commands\Support\RegionalSyncCommand;
 use App\Models\FuenteDatos;
 use App\Services\ContratoImporter;
 use App\Services\Regional\AsturiasParser;
+use App\Support\SafeUrl;
 use League\Csv\Reader;
 
 class SyncAsturias extends RegionalSyncCommand
@@ -115,7 +116,7 @@ class SyncAsturias extends RegionalSyncCommand
         try {
             $ch = curl_init($url);
             $fp = fopen($tempFile, 'w');
-            curl_setopt_array($ch, [
+            curl_setopt_array($ch, SafeUrl::curlOptions() + [
                 CURLOPT_FILE => $fp,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_TIMEOUT => 600,

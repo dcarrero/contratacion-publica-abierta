@@ -9,6 +9,7 @@ use App\Models\FuenteDatos;
 use App\Services\ContratoImporter;
 use App\Services\Regional\ExistingContractIndex;
 use App\Services\Regional\MadridAytoParser;
+use App\Support\SafeUrl;
 use Illuminate\Support\Facades\DB;
 use League\Csv\Reader;
 
@@ -216,6 +217,13 @@ class SyncMadridAyto extends RegionalSyncCommand
                 continue;
             }
 
+            // La URL la dicta el CKAN remoto: solo https y de datos.madrid.es (SSRF).
+            if (! SafeUrl::isAllowedDownload($url, ['datos.madrid.es'])) {
+                $this->warn("  Recurso fuera de datos.madrid.es, se ignora: {$url}");
+
+                continue;
+            }
+
             $byYear[(int) $m[1]][] = ['url' => $url, 'description' => $description];
         }
 
@@ -299,7 +307,7 @@ class SyncMadridAyto extends RegionalSyncCommand
             return null;
         }
 
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, SafeUrl::curlOptions() + [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_TIMEOUT => 300,

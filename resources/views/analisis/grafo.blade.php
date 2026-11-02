@@ -66,6 +66,8 @@
 
     // Escala compartida con el resto del sitio (resources/js/app.js).
     const formatImporte = window.formatImporteCorto;
+    // Nombres y NIF vienen de fuentes externas: escapar antes de meterlos en innerHTML.
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 
     function loadGrafo(ccaa) {
         loading.style.display = 'flex';
@@ -162,8 +164,8 @@
 
         // Tooltip en hover
         node.on('mouseover', function(event, d) {
-            tooltip.innerHTML = '<strong>' + d.label + '</strong><br>' +
-                '<span style="color:#888">' + d.nif + '</span><br>' +
+            tooltip.innerHTML = '<strong>' + esc(d.label) + '</strong><br>' +
+                '<span style="color:#888">' + esc(d.nif) + '</span><br>' +
                 (d.tipo === 'organismo' ? 'Organismo' : 'Adjudicatario') + '<br>' +
                 'Importe: ' + formatImporte(d.total_importe);
             tooltip.style.display = 'block';
@@ -194,8 +196,8 @@
                 ? '/organismos/' + encodeURIComponent(d.nif)
                 : '/empresas/' + encodeURIComponent(d.nif);
 
-            infoTitle.innerHTML = '<a href="' + url + '" class="text-primary hover:underline">' + d.label + '</a>' +
-                ' <span class="text-xs text-gray-400">(' + tipoLabel + ' · ' + d.nif + ')</span>';
+            infoTitle.innerHTML = '<a href="' + esc(url) + '" class="text-primary hover:underline">' + esc(d.label) + '</a>' +
+                ' <span class="text-xs text-gray-400">(' + tipoLabel + ' · ' + esc(d.nif) + ')</span>';
 
             let html = '<p class="mb-2">Importe total en relaciones mostradas: <strong>' + formatImporte(d.total_importe) + '</strong></p>';
             html += '<table class="min-w-full text-xs"><thead class="bg-gray-50"><tr><th class="px-2 py-1 text-left">Relación con</th><th class="px-2 py-1 text-right">Contratos</th><th class="px-2 py-1 text-right">Importe</th></tr></thead><tbody>';
@@ -209,8 +211,8 @@
                 const otherUrl = other.tipo === 'organismo'
                     ? '/organismos/' + encodeURIComponent(other.nif)
                     : '/empresas/' + encodeURIComponent(other.nif);
-                html += '<tr class="border-t"><td class="px-2 py-1"><a href="' + otherUrl + '" class="text-primary hover:underline">' + other.label + '</a></td>' +
-                    '<td class="px-2 py-1 text-right">' + c.num_contratos.toLocaleString('es-ES') + '</td>' +
+                html += '<tr class="border-t"><td class="px-2 py-1"><a href="' + esc(otherUrl) + '" class="text-primary hover:underline">' + esc(other.label) + '</a></td>' +
+                    '<td class="px-2 py-1 text-right">' + esc(Number(c.num_contratos).toLocaleString('es-ES')) + '</td>' +
                     '<td class="px-2 py-1 text-right">' + formatImporte(c.total_importe) + '</td></tr>';
             });
             html += '</tbody></table>';
@@ -251,8 +253,8 @@
         link.on('mouseover', function(event, d) {
             const src = typeof d.source === 'object' ? d.source : data.nodes.find(n => n.id === d.source);
             const tgt = typeof d.target === 'object' ? d.target : data.nodes.find(n => n.id === d.target);
-            tooltip.innerHTML = (src ? src.label : '?') + ' ↔ ' + (tgt ? tgt.label : '?') +
-                '<br>' + d.num_contratos + ' contratos · ' + formatImporte(d.total_importe);
+            tooltip.innerHTML = esc(src ? src.label : '?') + ' ↔ ' + esc(tgt ? tgt.label : '?') +
+                '<br>' + esc(d.num_contratos) + ' contratos · ' + formatImporte(d.total_importe);
             tooltip.style.display = 'block';
             tooltip.style.left = event.clientX + 12 + 'px';
             tooltip.style.top = event.clientY - 10 + 'px';

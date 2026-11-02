@@ -39,6 +39,9 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            // Vida de la cookie «recordarme», en minutos (30 días). Sin esto, Laravel
+            // la emite a ~400 días.
+            'remember' => 43200,
         ],
     ],
 

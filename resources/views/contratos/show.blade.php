@@ -199,8 +199,8 @@
             {{-- Fuente oficial --}}
             <div class="bg-white rounded-lg shadow p-5">
                 <h2 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Fuente oficial</h2>
-                @if($contrato->url_placsp)
-                    <a href="{{ $contrato->url_placsp }}" target="_blank" rel="noopener"
+                @if(\App\Support\SafeUrl::forLink($contrato->url_placsp))
+                    <a href="{{ \App\Support\SafeUrl::forLink($contrato->url_placsp) }}" target="_blank" rel="noopener"
                        class="block w-full text-center bg-primary text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-primary-dark transition mb-4">
                         Ver en fuente oficial
                     </a>

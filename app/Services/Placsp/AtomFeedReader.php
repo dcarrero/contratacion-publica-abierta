@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Placsp;
 
+use App\Support\SafeUrl;
 use Generator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,13 @@ use SimpleXMLElement;
 
 class AtomFeedReader
 {
+    /**
+     * Dominios de PLACSP. La paginación puede saltar entre ellos: el feed de menores
+     * se sirve en contrataciondelsectorpublico.gob.es y su rel="next" apunta a
+     * contrataciondelestado.es.
+     */
+    private const PLACSP_DOMAINS = ['contrataciondelestado.es', 'contrataciondelsectorpublico.gob.es'];
+
     private string $feedUrl;
 
     private int $maxPages;
@@ -129,6 +137,7 @@ class AtomFeedReader
         for ($attempt = 1; $attempt <= $this->retryAttempts; $attempt++) {
             try {
                 $response = Http::timeout($this->timeoutSeconds)
+                    ->withOptions(SafeUrl::guzzleOptions())
                     ->withHeaders([
                         'User-Agent' => 'ContratacionAbierta/2.0 (transparencia; +https://github.com/dcarrero/contratacion-publica-clm-es)',
                         'Accept' => 'application/atom+xml, application/xml, text/xml',
@@ -198,10 +207,33 @@ class AtomFeedReader
             $href = (string) $link['href'];
 
             if ($rel === 'next' && $href !== '') {
+                // El href lo dicta el feed remoto: solo se sigue si es https y apunta
+                // al mismo servidor del feed o a PLACSP, nunca a otro destino (SSRF).
+                if (! SafeUrl::isAllowedDownload($href, $this->allowedDomains())) {
+                    Log::warning('AtomFeedReader: enlace next fuera de los dominios permitidos; se detiene la paginación', [
+                        'href' => $href,
+                    ]);
+
+                    return null;
+                }
+
                 return $href;
             }
         }
 
         return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function allowedDomains(): array
+    {
+        $feedHost = parse_url($this->feedUrl, PHP_URL_HOST);
+
+        return array_values(array_unique(array_filter([
+            is_string($feedHost) ? strtolower($feedHost) : null,
+            ...self::PLACSP_DOMAINS,
+        ])));
     }
 }

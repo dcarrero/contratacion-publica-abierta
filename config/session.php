@@ -169,7 +169,9 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    // Por defecto, Secure cuando la app se sirve por https (APP_URL); así producción
+    // no depende de acordarse de SESSION_SECURE_COOKIE. En local (http) queda en false.
+    'secure' => env('SESSION_SECURE_COOKIE', str_starts_with((string) env('APP_URL', ''), 'https://')),
 
     /*
     |--------------------------------------------------------------------------

@@ -52,8 +52,8 @@
             @if($organismo->dir3)
                 <span class="text-xs">DIR3: {{ $organismo->dir3 }}</span>
             @endif
-            @if($organismo->url_perfil_placsp)
-                <a href="{{ $organismo->url_perfil_placsp }}" target="_blank" rel="noopener" class="text-primary hover:underline text-xs">Ver en PLACSP</a>
+            @if(\App\Support\SafeUrl::forLink($organismo->url_perfil_placsp))
+                <a href="{{ \App\Support\SafeUrl::forLink($organismo->url_perfil_placsp) }}" target="_blank" rel="noopener" class="text-primary hover:underline text-xs">Ver en PLACSP</a>
             @endif
         </x-slot:meta>
 

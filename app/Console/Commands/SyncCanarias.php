@@ -8,6 +8,7 @@ use App\Models\FuenteDatos;
 use App\Models\ImportLog;
 use App\Services\ContratoImporter;
 use App\Services\Regional\CanariasParser;
+use App\Support\SafeUrl;
 use Illuminate\Console\Command;
 use League\Csv\Reader;
 
@@ -84,7 +85,7 @@ class SyncCanarias extends Command
         try {
             $ch = curl_init(self::DIRECT_CSV_URL);
             $fp = fopen($tempFile, 'w');
-            curl_setopt_array($ch, [
+            curl_setopt_array($ch, SafeUrl::curlOptions() + [
                 CURLOPT_FILE => $fp,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_TIMEOUT => 900,
